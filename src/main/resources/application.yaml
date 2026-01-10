@@ -1,0 +1,85 @@
+spring:
+  application:
+    name: rent-tech-api
+
+  # ===============================
+  # Datasource Configuration
+  # ===============================
+
+  # Server DB
+  # datasource:
+  #   url: jdbc:mysql://db-mysql-sgp1-84255-do-user-15655474-0.h.db.ondigitalocean.com:25060/vromon_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+  #   username: doadmin
+  #   password: AVNS_HiB7Cg0kpa4D8JOE_SP
+  #   driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # Local DB
+  datasource:
+    url: jdbc:mysql://localhost:3306/rent_tech_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: root
+    password: password
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # ===============================
+  # JPA / Hibernate
+  # ===============================
+  jpa:
+    hibernate:
+      ddl-auto: update   # create | create-drop | validate | none
+    properties:
+      hibernate:
+        show_sql: false
+
+  # ===============================
+  # Jackson
+  # ===============================
+  jackson:
+    serialization:
+      fail-on-empty-beans: false
+
+  # ===============================
+  # File Upload
+  # ===============================
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 50MB
+
+# ===============================
+# Server Configuration
+# ===============================
+server:
+  port: 6002
+
+# ===============================
+# Application Security
+# ===============================
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 2592000000
+      refresh-token:
+        expiration: 5184000000
+    access:
+      password: 418842
+
+# ===============================
+# SMS Configuration
+# ===============================
+sms:
+  bdbulksms:
+    net:
+      host: https://api.greenweb.com.bd/api.php
+      token: 98642155331692028533b279c2cab3f71e32d65db1dab3b7a9eb
+
+# ===============================
+# DigitalOcean Spaces
+# ===============================
+do:
+  spaces:
+    access-key: DO00DZCY9B9WGZX8K398
+    secret-key: 3AW81q/Uzy9uStT9U2uOjvOFgxsVd2dGIE8snA6TCPY
+    endpoint: https://vromon.sgp1.digitaloceanspaces.com
+    region: sgp1
+    bucket: vromon

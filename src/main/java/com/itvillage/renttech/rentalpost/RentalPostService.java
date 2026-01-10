@@ -161,7 +161,7 @@ public class RentalPostService {
     public List<RentalPostResponse> getMyRentalPost() {
         return rentalPostRepository.findAllByOwnerId(TokenUtils.getCurrentUserId())
                 .stream()
-                .map(rentalPost -> ConverterUtils.convert(rentalPost,List.of("category")))
+                .map(rentalPost -> ConverterUtils.convert(rentalPost,List.of("category","formQuestionsAnswer","rentalPostFiles")))
                 .collect(Collectors.toList());
     }
 
@@ -169,5 +169,18 @@ public class RentalPostService {
         RentalPost rentalPost = rentalPostRepository.findById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
         return ConverterUtils.convert(rentalPost);
+    }
+
+    public List<RentalPostResponse> getPostLocationByCategory(String categoryId) {
+        List<RentalPost> rentalPosts = rentalPostRepository.findAllByCategoryId(categoryId);
+        return rentalPosts.stream()
+                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("formQuestionsAnswer")))
+                .collect(Collectors.toList());
+    }
+
+    public List<RentalPostResponse> getMyInterestedRentalPost() {
+        return rentalPostRepository.findAllByInterestedUserId(TokenUtils.getCurrentUserId()).stream()
+                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category","owner","formQuestionsAnswer","rentalPostFiles")))
+                .collect(Collectors.toList());
     }
 }

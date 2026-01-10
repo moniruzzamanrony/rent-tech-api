@@ -62,4 +62,15 @@ public class RentalPostController {
         return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.getPostDetails(rentalId));
     }
 
+    @GetMapping("/categories/{categoryId}/location")
+    public APIResponseDto<List<RentalPostResponse>> getPostLocationByCategory(@PathVariable String categoryId) {
+        List<RentalPostResponse> responses = rentalPostService.getPostLocationByCategory(categoryId);
+        return new APIResponseDto<>(HttpStatus.OK.value(), responses);
+    }
+
+    @GetMapping("/my-interested-post")
+    public APIResponseDto<List<RentalPostResponse>> getMyInterestedRentalPost() {
+        List<RentalPostResponse> responses = rentalPostService.getMyInterestedRentalPost();
+        return new APIResponseDto<>(HttpStatus.OK.value(), responses);
+    }
 }

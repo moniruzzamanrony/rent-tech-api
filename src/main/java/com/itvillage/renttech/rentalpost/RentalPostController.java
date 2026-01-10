@@ -23,6 +23,11 @@ public class RentalPostController {
         return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.createRentalPost(request));
     }
 
+    @PutMapping("/{rentalId}/update")
+    public APIResponseDto<RentalPostResponse> updateRentalPost(@RequestBody RentalPostRequest request, @PathVariable String rentalId) {
+        return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.updateRentalPost(rentalId,request));
+    }
+
 
     @PutMapping("/{rentalId}/location/update")
     public APIResponseDto<RentalPostResponse> updateLocation(@RequestParam("latitude") String  latitude,

@@ -17,6 +17,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -183,4 +184,61 @@ public class RentalPostService {
                 .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category","owner","formQuestionsAnswer","rentalPostFiles")))
                 .collect(Collectors.toList());
     }
+
+    @Transactional
+    public RentalPostResponse updateRentalPost(String rentalId, RentalPostRequest request) {
+        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
+
+        BeanUtils.copyProperties(request, rentalPost,
+                "formQuestionsAnswer", "categoryId", "interestedPeople", "rentalPostFiles");
+
+        List<UserAnswerDFormQuestionRequest> formAnswers = request.getFormQuestionsAnswer();
+        if (formAnswers != null && !formAnswers.isEmpty()) {
+
+            Set<String> questionIds = formAnswers.stream()
+                    .map(UserAnswerDFormQuestionRequest::getDynamicFormQuestionId)
+                    .collect(Collectors.toSet());
+
+            Map<String, DynamicFormQuestion> questionMap = dynamicFormService.getByIds(questionIds)
+                    .stream()
+                    .collect(Collectors.toMap(DynamicFormQuestion::getId, q -> q));
+
+            // Map existing answers by dynamicFormQuestionId
+            Map<String, UserAnswerDFormQuestion> existingAnswerMap = rentalPost.getFormQuestionsAnswer()
+                    .stream()
+                    .collect(Collectors.toMap(ans -> ans.getDynamicFormQuestion().getId(), ans -> ans));
+
+            List<UserAnswerDFormQuestion> updatedAnswers = new ArrayList<>();
+
+            for (UserAnswerDFormQuestionRequest req : formAnswers) {
+                DynamicFormQuestion question = questionMap.get(req.getDynamicFormQuestionId());
+                if (question == null) {
+                    throw new MagicException.NotFoundException(
+                            "Dynamic question not found: " + req.getDynamicFormQuestionId()
+                    );
+                }
+
+                UserAnswerDFormQuestion answer = existingAnswerMap.get(req.getDynamicFormQuestionId());
+                if (answer != null) {
+                    // Update existing answer
+                    answer.setAnswers(req.getAnswers());
+                } else {
+                    // Create new answer if it doesn't exist
+                    answer = new UserAnswerDFormQuestion();
+                    answer.setDynamicFormQuestion(question);
+                    answer.setAnswers(req.getAnswers());
+                }
+                updatedAnswers.add(answer);
+            }
+
+            // Replace the old list with updated list
+            rentalPost.getFormQuestionsAnswer().clear();
+            rentalPost.getFormQuestionsAnswer().addAll(updatedAnswers);
+        }
+
+        RentalPost savedPost = rentalPostRepository.save(rentalPost);
+        return ConverterUtils.convert(savedPost);
+    }
+
 }

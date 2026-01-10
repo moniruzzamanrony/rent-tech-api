@@ -1,30 +1,41 @@
 package com.itvillage.renttech.base.utils;
 
 
-
+import com.itvillage.renttech.dynamicform.DynamicFormQuestion;
+import com.itvillage.renttech.dynamicform.DynamicFormQuestionResponse;
+import com.itvillage.renttech.dynamicform.QuestionOption;
+import com.itvillage.renttech.dynamicform.QuestionOptionResponse;
 import com.itvillage.renttech.verification.user.User;
 import com.itvillage.renttech.verification.user.UserResponse;
 import org.springframework.beans.BeanUtils;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 public class ConverterUtils {
-//    public static PromotePackageResponseDto convert(User user, PromotePackage promotePackage) {
-//        PromotePackageResponseDto promotePackageDto = new PromotePackageResponseDto();
-//        BeanUtils.copyProperties(promotePackage, promotePackageDto);
-//        promotePackageDto.setAdvertisementAdsPackage(promotePackage.getAdvertisementAdsPackage());
-//        promotePackageDto.setCountry(promotePackage.getCountry());
-//        promotePackageDto.setOwner(convert(user));
-//        return promotePackageDto;
-//    }
+    public static DynamicFormQuestionResponse convert(DynamicFormQuestion dynamicFormQuestion) {
+        DynamicFormQuestionResponse dynamicFormQuestionResponse = new DynamicFormQuestionResponse();
+        BeanUtils.copyProperties(dynamicFormQuestion, dynamicFormQuestionResponse, "category");
+        dynamicFormQuestionResponse.setCategory(dynamicFormQuestion.getCategory());
+        if (dynamicFormQuestion.getDefaultOptions() != null) {
+            dynamicFormQuestionResponse.setDefaultOptions(dynamicFormQuestion.getDefaultOptions().stream()
+                    .map(ConverterUtils::convert)
+                    .collect(Collectors.toList()));
+        }
+        return dynamicFormQuestionResponse;
+    }
 
     public static UserResponse convert(User user) {
         UserResponse userResponse = new UserResponse();
         BeanUtils.copyProperties(user, userResponse);
         return userResponse;
     }
-//
+    public static QuestionOptionResponse convert(QuestionOption questionOption) {
+        QuestionOptionResponse questionOptionResponse = new QuestionOptionResponse();
+        BeanUtils.copyProperties(questionOption, questionOptionResponse);
+        return questionOptionResponse;
+    }
+
+
 //    public static TravelPlanResponseDto convert(TravelPlan travelPlan) {
 //        if(travelPlan ==  null) return null;
 //        TravelPlanResponseDto travelPlanResponseDto = new TravelPlanResponseDto();

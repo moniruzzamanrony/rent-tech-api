@@ -78,4 +78,12 @@ public class RentalPostController {
         List<RentalPostResponse> responses = rentalPostService.getMyInterestedRentalPost();
         return new APIResponseDto<>(HttpStatus.OK.value(), responses);
     }
+
+
+    @DeleteMapping("/{rentalId}")
+    public APIResponseDto<String> deleteRentalPost(@PathVariable String rentalId) {
+        rentalPostService.deleteRentalPost(rentalId);
+        return new APIResponseDto<>(HttpStatus.OK.value(), "Rental post deleted successfully");
+    }
+
 }

@@ -241,4 +241,13 @@ public class RentalPostService {
         return ConverterUtils.convert(savedPost);
     }
 
+    public void deleteRentalPost(String rentalId) {
+        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
+
+        // Delete associated files from S3
+        rentalPost.getRentalPostFiles().forEach(file -> spaceService.deleteFile(file.getUrl()));
+
+        rentalPostRepository.delete(rentalPost);
+    }
 }

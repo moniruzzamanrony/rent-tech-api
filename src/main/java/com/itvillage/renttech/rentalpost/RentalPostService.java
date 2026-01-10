@@ -95,10 +95,10 @@ public class RentalPostService {
         return ConverterUtils.convert(rentalPost);
     }
 
-    public RentalPostResponse updateLocation(String rentalId, Long latitude, Long longitude) {
+    public RentalPostResponse updateLocation(String rentalId, String latitude, String longitude) {
         RentalPost rentalPost = rentalPostRepository.findById(rentalId).orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
-        rentalPost.setLatitude(latitude);
-        rentalPost.setLongitude(longitude);
+        rentalPost.setLatitude(Double.parseDouble(latitude));
+        rentalPost.setLongitude(Double.parseDouble(longitude));
         rentalPost = rentalPostRepository.save(rentalPost);
         return ConverterUtils.convert(rentalPost);
 
@@ -142,6 +142,32 @@ public class RentalPostService {
         rentalPost.getRentalPostFiles().remove(fileToDelete);
         rentalPost = rentalPostRepository.save(rentalPost);
 
+        return ConverterUtils.convert(rentalPost);
+    }
+
+    public RentalPostResponse addInterestedPeople(String rentalId) {
+        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
+
+        rentalPost.getInterestedPeople().add(
+                userService.getById(TokenUtils.getCurrentUserId())
+                        .orElseThrow(() -> new MagicException.NotFoundException("User not found"))
+        );
+
+        rentalPost = rentalPostRepository.save(rentalPost);
+        return ConverterUtils.convert(rentalPost);
+    }
+
+    public List<RentalPostResponse> getMyRentalPost() {
+        return rentalPostRepository.findAllByOwnerId(TokenUtils.getCurrentUserId())
+                .stream()
+                .map(rentalPost -> ConverterUtils.convert(rentalPost,List.of("category")))
+                .collect(Collectors.toList());
+    }
+
+    public RentalPostResponse getPostDetails(String rentalId) {
+        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
         return ConverterUtils.convert(rentalPost);
     }
 }

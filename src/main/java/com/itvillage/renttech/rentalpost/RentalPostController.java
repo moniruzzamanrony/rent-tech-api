@@ -25,8 +25,8 @@ public class RentalPostController {
 
 
     @PutMapping("/{rentalId}/location/update")
-    public APIResponseDto<RentalPostResponse> updateLocation(@RequestParam("latitude") Long  latitude,
-                                                             @RequestParam("longitude") Long  longitude, @PathVariable String rentalId) {
+    public APIResponseDto<RentalPostResponse> updateLocation(@RequestParam("latitude") String  latitude,
+                                                             @RequestParam("longitude") String  longitude, @PathVariable String rentalId) {
         return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.updateLocation(rentalId,latitude, longitude));
     }
 
@@ -38,11 +38,28 @@ public class RentalPostController {
         return new APIResponseDto<>(HttpStatus.OK.value(), response);
     }
 
+    @PutMapping( "/{rentalId}/interested")
+    public APIResponseDto<RentalPostResponse> addInterestedPeople(@PathVariable String rentalId) {
+        RentalPostResponse response = rentalPostService.addInterestedPeople(rentalId);
+        return new APIResponseDto<>(HttpStatus.OK.value(), response);
+    }
+
     @DeleteMapping(path = "/{rentalId}/files/{fileName}/delete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public APIResponseDto<RentalPostResponse> deleteFile(
             @PathVariable("rentalId") String rentalId, @PathVariable String fileName) {
         RentalPostResponse response = rentalPostService.deleteFile(rentalId, fileName);
         return new APIResponseDto<>(HttpStatus.OK.value(), response);
+    }
+
+    @GetMapping("/my-post")
+    public APIResponseDto<List<RentalPostResponse>> getMyRentalPost() {
+        List<RentalPostResponse> responses = rentalPostService.getMyRentalPost();
+        return new APIResponseDto<>(HttpStatus.OK.value(), responses);
+    }
+
+    @GetMapping("/{rentalId}/details")
+    public APIResponseDto<RentalPostResponse> getPostDetails( @PathVariable String rentalId) {
+        return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.getPostDetails(rentalId));
     }
 
 }

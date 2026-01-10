@@ -2,47 +2,27 @@ package com.itvillage.renttech.verification.user;
 
 
 import com.itvillage.renttech.base.dto.BaseDto;
+import jakarta.persistence.Convert;
 import lombok.Data;
-
-import java.util.List;
 
 @Data
 public class UserResponse extends BaseDto {
-  private String fullName;
-
-  private String dateOfBirth;
-
-  private String gender;
-
-  private String travelerType;
-
-  private int currentCoins;
-
-  private List<String> countryTraveled;
-
-  private ProfileStatus status;
-
-  private String nidNumber;
+  private String name;
 
   private String mobileNo;
 
-  private String profilePicFileName;
+  @Convert(converter = Gender.GenderConverter.class)
+  private Gender gender;
 
-  private int ratingCount;
+  private String nidNumber;
 
-  private int ratingTotalVal;
+  private String presentAddress;
 
-  private int rating;
+  private String password;
 
-  private boolean isProfileCompleted;
+  private int currentCoins;
 
-  // Agency specific
-  private String agencyName;
-  private String officeAddress;
-  private String helplineNumber;
-    private String tradeLicense;
-  private String facebookLink;
-  private String website;
+  private String profilePicUrl;
 
   private Role role;
 }

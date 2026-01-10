@@ -17,10 +17,8 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 public class DynamicFormService {
-
     private final DynamicFormQuestionRepository dynamicFormQuestionRepository;
     private final QuestionOptionRepository questionOptionRepository;
-    private final UserAnswerDFormService userAnswerDFormService;
     private final CategoryService categoryService;
 
 
@@ -75,19 +73,10 @@ public class DynamicFormService {
     }
 
 
-    public void saveAnswers(List<UserAnswerDFormQuestion> userAnswerDFormQuestions) {
-        userAnswerDFormService.saveAnswers(userAnswerDFormQuestions);
-    }
-
     public List<DynamicFormQuestionResponse> getFormBycCategoryId(String categoryId) {
-        List<DynamicFormQuestion>  dynamicFormQuestions = dynamicFormQuestionRepository.findAllByCategoryId(categoryId);
+        List<DynamicFormQuestion>  dynamicFormQuestions = dynamicFormQuestionRepository.findAllByCategoryIdOrderByPositionAsc(categoryId);
         return dynamicFormQuestions.stream().map(ConverterUtils::convert).toList();
     }
-
-    public DynamicFormQuestion getDFQuestionById(String questionId) {
-        return dynamicFormQuestionRepository.findById(questionId).orElseThrow(() -> new MagicException.NotFoundException("Question not found"));
-    }
-
 
     public List<DynamicFormQuestion> getByIds(Set<String> questionIds) {
         return dynamicFormQuestionRepository.findAllByIdIn(questionIds);

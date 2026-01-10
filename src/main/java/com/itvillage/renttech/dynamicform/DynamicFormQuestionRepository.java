@@ -8,7 +8,8 @@ import java.util.Set;
 
 @Repository
 public interface DynamicFormQuestionRepository extends JpaRepository<DynamicFormQuestion, String> {
-    List<DynamicFormQuestion> findAllByCategoryId(String categoryId);
+
+    List<DynamicFormQuestion> findAllByCategoryIdOrderByPositionAsc(String categoryId);
 
     List<DynamicFormQuestion> findAllByIdIn(Set<String> questionIds);
 }

@@ -8,6 +8,7 @@ import com.itvillage.renttech.verification.user.User;
 import com.itvillage.renttech.verification.user.UserResponse;
 import org.springframework.beans.BeanUtils;
 
+import java.util.List;
 import java.util.stream.Collectors;
 
 public class ConverterUtils {
@@ -28,6 +29,7 @@ public class ConverterUtils {
         BeanUtils.copyProperties(user, userResponse);
         return userResponse;
     }
+
     public static QuestionOptionResponse convert(QuestionOption questionOption) {
         QuestionOptionResponse questionOptionResponse = new QuestionOptionResponse();
         BeanUtils.copyProperties(questionOption, questionOptionResponse);
@@ -36,12 +38,28 @@ public class ConverterUtils {
 
     public static RentalPostResponse convert(RentalPost rentalPost) {
         RentalPostResponse rentalPostResponse = new RentalPostResponse();
-        BeanUtils.copyProperties(rentalPost, rentalPostResponse);
+        BeanUtils.copyProperties(rentalPost, rentalPostResponse,"rentalPostFiles", "category");
         rentalPostResponse.setCategory(rentalPost.getCategory());
         rentalPostResponse.setOwner(convert(rentalPost.getOwner()));
         rentalPostResponse.setFormQuestionsAnswer(rentalPost.getFormQuestionsAnswer().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
         rentalPostResponse.setRentalPostFiles(rentalPost.getRentalPostFiles());
         rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(ConverterUtils::convert).collect(Collectors.toSet()));
+        return rentalPostResponse;
+    }
+
+    public static RentalPostResponse convert(RentalPost rentalPost, List<String> includes) {
+        RentalPostResponse rentalPostResponse = new RentalPostResponse();
+        BeanUtils.copyProperties(rentalPost, rentalPostResponse,"rentalPostFiles", "category");
+        if (includes.contains("category"))
+            rentalPostResponse.setCategory(rentalPost.getCategory());
+        if (includes.contains("owner"))
+            rentalPostResponse.setOwner(convert(rentalPost.getOwner()));
+        if (includes.contains("formQuestionsAnswer"))
+            rentalPostResponse.setFormQuestionsAnswer(rentalPost.getFormQuestionsAnswer().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
+        if (includes.contains("rentalPostFiles"))
+            rentalPostResponse.setRentalPostFiles(rentalPost.getRentalPostFiles());
+        if (includes.contains("interestedPeople"))
+            rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(ConverterUtils::convert).collect(Collectors.toSet()));
         return rentalPostResponse;
     }
 

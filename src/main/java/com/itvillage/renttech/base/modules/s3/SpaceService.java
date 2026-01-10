@@ -1,13 +1,14 @@
 package com.itvillage.renttech.base.modules.s3;
 
+import com.itvillage.renttech.base.expection.MagicException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 
-import java.nio.file.Paths;
 import java.util.Base64;
 import java.util.UUID;
 
@@ -26,63 +27,30 @@ public class SpaceService {
         this.s3Client = s3Client;
     }
 
-    public void uploadFile(String key, String filePath) {
-        PutObjectRequest request = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(key)
-                .build();
 
-        s3Client.putObject(request, Paths.get(filePath));
-    }
 
-    public String uploadBase64Image(String base64String) {
-        if(base64String == null || base64String.isEmpty()) {
-            throw new IllegalArgumentException("base64String cannot be null or empty");
-        }
-        // Example base64String may look like: data:image/png;base64,iVBORw0KGgo...
-        String contentType = "image/jpeg"; // default
-        String fileExtension = "jpg";
+    public String uploadFile(MultipartFile file) {
+        try {
+        String contentType = file.getContentType();
 
-        // Detect image type from prefix
-        if (base64String.startsWith("data:image/")) {
-            String mimeType = base64String.substring(5, base64String.indexOf(";"));
-            contentType = mimeType;
-            fileExtension = mimeType.substring(mimeType.indexOf("/") + 1);
-        }
-
-        // Remove prefix (data:image/...;base64,)
-        if (base64String.contains(",")) {
-            base64String = base64String.split(",")[1];
-        }
-
-        // Remove possible spaces or newlines
-        base64String = base64String.replaceAll("\\s+", "");
-
-        byte[] imageBytes = Base64.getDecoder().decode(base64String);
-
-        String fileName = UUID.randomUUID() + "." + fileExtension;
-
-        PutObjectRequest request = PutObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .contentType(contentType)
-                .acl("public-read")
-                .build();
-
-        s3Client.putObject(request, RequestBody.fromBytes(imageBytes));
-
-        return String.format("https://%s.%s.cdn.digitaloceanspaces.com/%s/%s", bucketName, region,bucketName, fileName);
-    }
-
-    public String uploadByteArrImage(byte[] image, String contentType) {
-
-        // Detect extension from content type
         String fileExtension = switch (contentType) {
+
+            // Images
             case "image/jpeg" -> "jpg";
             case "image/png" -> "png";
             case "image/webp" -> "webp";
+
+            // Videos
+            case "video/mp4" -> "mp4";
+            case "video/webm" -> "webm";
+            case "video/quicktime" -> "mov";
+
+            // Documents
             case "application/pdf" -> "pdf";
-            default -> "bin";
+
+            default -> throw new MagicException.BadRequestException(
+                    "Unsupported file type: " + contentType
+            );
         };
 
         String fileName = UUID.randomUUID() + "." + fileExtension;
@@ -94,11 +62,18 @@ public class SpaceService {
                 .acl("public-read")
                 .build();
 
-        s3Client.putObject(request, RequestBody.fromBytes(image));
+            s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
 
-        return String.format("https://%s.%s.cdn.digitaloceanspaces.com/%s/%s",
-                bucketName, region, bucketName, fileName);
+            return String.format(
+                    "https://%s.%s.cdn.digitaloceanspaces.com/%s/%s",
+                    bucketName, region, bucketName, fileName
+            );
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
+
+
 
 
     public String uploadBase64File(String base64String) {

@@ -1,6 +1,5 @@
 package com.itvillage.renttech.dynamicform;
 
-import jakarta.persistence.Column;
 import lombok.Data;
 
 import java.util.List;
@@ -9,7 +8,6 @@ import java.util.List;
 public class UserAnswerDFormQuestionRequest {
     private String dynamicFormQuestionId;
 
-    @Column(nullable = false)
-    private List<String> answer;
+    private List<String> answers;
 
 }

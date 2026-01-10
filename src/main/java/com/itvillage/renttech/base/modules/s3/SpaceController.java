@@ -12,7 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(ApiConstant.PRIVATE_BASE_API+"/spaces")
+@RequestMapping(ApiConstant.PRIVATE_BASE_API + "/spaces")
 public class SpaceController {
 
     private final SpaceService spaceService;
@@ -21,27 +21,13 @@ public class SpaceController {
     public APIResponseDto<String> uploadImage(
             @RequestPart("file") MultipartFile file
     ) {
-        try {
-            String url = spaceService.uploadByteArrImage(file.getBytes(), file.getContentType());
-            return new APIResponseDto<>(HttpStatus.OK.value(), "Success", url);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return new APIResponseDto<>(HttpStatus.INTERNAL_SERVER_ERROR.value(), "Upload failed");
-        }
+
+        String url = spaceService.uploadFile(file);
+        return new APIResponseDto<>(HttpStatus.OK.value(), "Success", url);
+
     }
 
-    /**
-     * Upload a Base64 image (supports JPG, PNG, etc.) to DigitalOcean Spaces
-     */
-    @PostMapping("/upload-base64")
-    public APIResponseDto<String> uploadBase64(@RequestBody SpaceRequest spaceRequest) {
-        try {
-            String url = spaceService.uploadBase64Image(spaceRequest.getBase64Image());
-            return new APIResponseDto<>(HttpStatus.OK.value(), "Success", url);
-        } catch (Exception e) {
-            return new APIResponseDto<>(HttpStatus.INTERNAL_SERVER_ERROR.value(),"Upload failed");
-        }
-    }
+
 
     /**
      * Delete a file from DigitalOcean Spaces by filename or full URL

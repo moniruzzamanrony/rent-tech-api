@@ -1,10 +1,9 @@
 package com.itvillage.renttech.base.utils;
 
 
-import com.itvillage.renttech.dynamicform.DynamicFormQuestion;
-import com.itvillage.renttech.dynamicform.DynamicFormQuestionResponse;
-import com.itvillage.renttech.dynamicform.QuestionOption;
-import com.itvillage.renttech.dynamicform.QuestionOptionResponse;
+import com.itvillage.renttech.dynamicform.*;
+import com.itvillage.renttech.rentalpost.RentalPost;
+import com.itvillage.renttech.rentalpost.RentalPostResponse;
 import com.itvillage.renttech.verification.user.User;
 import com.itvillage.renttech.verification.user.UserResponse;
 import org.springframework.beans.BeanUtils;
@@ -33,6 +32,24 @@ public class ConverterUtils {
         QuestionOptionResponse questionOptionResponse = new QuestionOptionResponse();
         BeanUtils.copyProperties(questionOption, questionOptionResponse);
         return questionOptionResponse;
+    }
+
+    public static RentalPostResponse convert(RentalPost rentalPost) {
+        RentalPostResponse rentalPostResponse = new RentalPostResponse();
+        BeanUtils.copyProperties(rentalPost, rentalPostResponse);
+        rentalPostResponse.setCategory(rentalPost.getCategory());
+        rentalPostResponse.setOwner(convert(rentalPost.getOwner()));
+        rentalPostResponse.setFormQuestionsAnswer(rentalPost.getFormQuestionsAnswer().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
+        rentalPostResponse.setRentalPostFiles(rentalPost.getRentalPostFiles());
+        rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(ConverterUtils::convert).collect(Collectors.toSet()));
+        return rentalPostResponse;
+    }
+
+    private static UserAnswerDFormQuestionResponse convert(UserAnswerDFormQuestion userAnswerDFormQuestion) {
+        UserAnswerDFormQuestionResponse userAnswerDFormQuestionResponse = new UserAnswerDFormQuestionResponse();
+        BeanUtils.copyProperties(userAnswerDFormQuestion, userAnswerDFormQuestionResponse);
+        userAnswerDFormQuestionResponse.setQuestion(convert(userAnswerDFormQuestion.getDynamicFormQuestion()));
+        return userAnswerDFormQuestionResponse;
     }
 
 

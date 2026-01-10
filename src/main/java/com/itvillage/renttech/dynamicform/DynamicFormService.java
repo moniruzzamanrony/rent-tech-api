@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 
 @Service
@@ -83,5 +84,13 @@ public class DynamicFormService {
         return dynamicFormQuestions.stream().map(ConverterUtils::convert).toList();
     }
 
+    public DynamicFormQuestion getDFQuestionById(String questionId) {
+        return dynamicFormQuestionRepository.findById(questionId).orElseThrow(() -> new MagicException.NotFoundException("Question not found"));
+    }
 
+
+    public List<DynamicFormQuestion> getByIds(Set<String> questionIds) {
+        return dynamicFormQuestionRepository.findAllByIdIn(questionIds);
+
+    }
 }

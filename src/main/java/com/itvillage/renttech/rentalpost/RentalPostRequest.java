@@ -9,11 +9,6 @@ import java.util.List;
 @Data
 public class RentalPostRequest {
     private String categoryId;
-
-    private double latitude;
-
-    private double longitude;
-
     private List<UserAnswerDFormQuestionRequest> formQuestionsAnswer = new ArrayList<>();
 
 }

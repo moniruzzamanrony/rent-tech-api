@@ -34,8 +34,7 @@ public class RentalPostService {
     private final SpaceService spaceService;
 
     @Transactional
-    public RentalPostResponse createRentalPost(RentalPostRequest request, List<MultipartFile> files) {
-
+    public RentalPostResponse createRentalPost(RentalPostRequest request) {
         // Create new RentalPost entity and copy properties from request
         // Excluding "formQuestionsAnswer" and "categoryId" as they require special handling
         RentalPost rentalPost = new RentalPost();
@@ -88,25 +87,6 @@ public class RentalPostService {
             rentalPost.setFormQuestionsAnswer(answers);
         }
 
-        // Process uploaded files if provided
-        if (files != null && !files.isEmpty()) {
-            rentalPost.setRentalPostFiles(
-                    files.stream()
-                            .filter(f -> !f.isEmpty()) // Skip empty files
-                            .map(file -> {
-                                // Upload the file to DigitalOcean Space and get URL
-                                String url = spaceService.uploadFile(file);
-
-                                // Create RentalPostFile entity to save in DB
-                                RentalPostFile rentalPostFile = new RentalPostFile();
-                                rentalPostFile.setUrl(url);
-                                rentalPostFile.setFileName(file.getOriginalFilename());
-                                rentalPostFile.setMimeType(file.getContentType());
-                                return rentalPostFile;
-                            })
-                            .toList()
-            );
-        }
 
         // Save RentalPost entity along with answers and files (cascading)
         rentalPost = rentalPostRepository.save(rentalPost);
@@ -115,4 +95,53 @@ public class RentalPostService {
         return ConverterUtils.convert(rentalPost);
     }
 
+    public RentalPostResponse updateLocation(String rentalId, Long latitude, Long longitude) {
+        RentalPost rentalPost = rentalPostRepository.findById(rentalId).orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
+        rentalPost.setLatitude(latitude);
+        rentalPost.setLongitude(longitude);
+        rentalPost = rentalPostRepository.save(rentalPost);
+        return ConverterUtils.convert(rentalPost);
+
+    }
+
+    public RentalPostResponse updateFiles(String rentalId, List<MultipartFile> files) {
+        RentalPost rentalPost = rentalPostRepository.findById(rentalId).orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
+
+        if (files != null && !files.isEmpty()) {
+            List<RentalPostFile> newFiles = files.stream()
+                    .filter(f -> !f.isEmpty())
+                    .map(file -> {
+                        String url = spaceService.uploadFile(file);
+                        RentalPostFile rentalPostFile = new RentalPostFile();
+                        rentalPostFile.setUrl(url);
+                        rentalPostFile.setFileName(file.getOriginalFilename());
+                        rentalPostFile.setMimeType(file.getContentType());
+                        return rentalPostFile;
+                    })
+                    .toList();
+            rentalPost.getRentalPostFiles().addAll(newFiles);
+        }
+        rentalPost = rentalPostRepository.save(rentalPost);
+        return ConverterUtils.convert(rentalPost);
+    }
+
+    public RentalPostResponse deleteFile(String rentalId, String fileName) {
+        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
+
+        // Find the file to delete
+        RentalPostFile fileToDelete = rentalPost.getRentalPostFiles().stream()
+                .filter(file -> file.getFileName().equals(fileName))
+                .findFirst()
+                .orElseThrow(() -> new MagicException.NotFoundException("File not found in rental post"));
+
+        // Delete file from S3
+        spaceService.deleteFile(fileToDelete.getUrl());
+
+        // Remove file from the list and save the rental post
+        rentalPost.getRentalPostFiles().remove(fileToDelete);
+        rentalPost = rentalPostRepository.save(rentalPost);
+
+        return ConverterUtils.convert(rentalPost);
+    }
 }

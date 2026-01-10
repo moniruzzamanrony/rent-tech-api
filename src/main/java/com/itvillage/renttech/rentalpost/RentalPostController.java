@@ -25,14 +25,14 @@ public class RentalPostController {
 
     @PutMapping("/{rentalId}/update")
     public APIResponseDto<RentalPostResponse> updateRentalPost(@RequestBody RentalPostRequest request, @PathVariable String rentalId) {
-        return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.updateRentalPost(rentalId,request));
+        return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.updateRentalPost(rentalId, request));
     }
 
 
     @PutMapping("/{rentalId}/location/update")
-    public APIResponseDto<RentalPostResponse> updateLocation(@RequestParam("latitude") String  latitude,
-                                                             @RequestParam("longitude") String  longitude, @PathVariable String rentalId) {
-        return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.updateLocation(rentalId,latitude, longitude));
+    public APIResponseDto<RentalPostResponse> updateLocation(@RequestParam("latitude") String latitude,
+                                                             @RequestParam("longitude") String longitude, @PathVariable String rentalId) {
+        return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.updateLocation(rentalId, latitude, longitude));
     }
 
     @PutMapping(path = "/{rentalId}/files/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -43,7 +43,7 @@ public class RentalPostController {
         return new APIResponseDto<>(HttpStatus.OK.value(), response);
     }
 
-    @PutMapping( "/{rentalId}/interested")
+    @PutMapping("/{rentalId}/interested")
     public APIResponseDto<RentalPostResponse> addInterestedPeople(@PathVariable String rentalId) {
         RentalPostResponse response = rentalPostService.addInterestedPeople(rentalId);
         return new APIResponseDto<>(HttpStatus.OK.value(), response);
@@ -63,7 +63,7 @@ public class RentalPostController {
     }
 
     @GetMapping("/{rentalId}/details")
-    public APIResponseDto<RentalPostResponse> getPostDetails( @PathVariable String rentalId) {
+    public APIResponseDto<RentalPostResponse> getPostDetails(@PathVariable String rentalId) {
         return new APIResponseDto<>(HttpStatus.OK.value(), rentalPostService.getPostDetails(rentalId));
     }
 

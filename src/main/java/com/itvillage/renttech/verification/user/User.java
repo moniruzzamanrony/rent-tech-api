@@ -3,10 +3,7 @@ package com.itvillage.renttech.verification.user;
 
 
 import com.itvillage.renttech.base.model.MagicBaseModel;
-import jakarta.persistence.Column;
-import jakarta.persistence.Convert;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,7 +12,9 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @Data
 @Builder
@@ -40,6 +39,15 @@ public class User extends MagicBaseModel implements UserDetails, Serializable {
   private int currentCoins;
 
   private String profilePicUrl;
+
+  @OneToMany(
+          fetch = FetchType.LAZY,
+          cascade = CascadeType.ALL,
+          orphanRemoval = true
+  )
+  @JoinColumn(name = "user_id") // foreign key in user_package table
+  private List<UserPackage> userPackages = new ArrayList<>();
+
 
 
   @Convert(converter = Role.RoleConverter.class)

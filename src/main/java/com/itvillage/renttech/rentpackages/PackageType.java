@@ -1,4 +1,4 @@
-package com.itvillage.renttech.packages;
+package com.itvillage.renttech.rentpackages;
 import jakarta.persistence.AttributeConverter;
 import jakarta.persistence.Converter;
 

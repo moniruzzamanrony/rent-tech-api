@@ -1,4 +1,4 @@
-package com.itvillage.renttech.packages;
+package com.itvillage.renttech.rentpackages;
 
 
 import com.itvillage.renttech.base.constants.ApiConstant;
@@ -8,8 +8,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping(ApiConstant.PRIVATE_BASE_API+"/packages")
-public class PackageController extends MagicController<PackageService, Package> {
-    public PackageController(PackageService service) {
+public class RentPackageController extends MagicController<RentPackageService, RentPackage> {
+    public RentPackageController(RentPackageService service) {
         super(service);
     }
 }

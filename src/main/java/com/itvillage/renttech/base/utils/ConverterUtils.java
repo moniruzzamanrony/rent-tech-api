@@ -8,6 +8,8 @@ import com.itvillage.renttech.notification.NotificationResponseDto;
 import com.itvillage.renttech.rentalpost.RentalPost;
 import com.itvillage.renttech.rentalpost.RentalPostResponse;
 import com.itvillage.renttech.verification.user.User;
+import com.itvillage.renttech.verification.user.UserPackage;
+import com.itvillage.renttech.verification.user.UserPackageResponse;
 import com.itvillage.renttech.verification.user.UserResponse;
 import org.springframework.beans.BeanUtils;
 
@@ -29,8 +31,16 @@ public class ConverterUtils {
 
     public static UserResponse convert(User user) {
         UserResponse userResponse = new UserResponse();
-        BeanUtils.copyProperties(user, userResponse);
+        BeanUtils.copyProperties(user, userResponse, "userPackages");
+        userResponse.setUserPackages(user.getUserPackages().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
         return userResponse;
+    }
+
+    public static UserPackageResponse convert(UserPackage userPackage) {
+        UserPackageResponse userPackageResponse = new UserPackageResponse();
+        BeanUtils.copyProperties(userPackage, userPackageResponse,  "rentPackage");
+        userPackageResponse.setRentPackage(userPackage.getRentPackage());
+        return userPackageResponse;
     }
 
     public static QuestionOptionResponse convert(QuestionOption questionOption) {

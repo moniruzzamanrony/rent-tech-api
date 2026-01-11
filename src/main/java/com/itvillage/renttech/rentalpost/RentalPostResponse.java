@@ -18,17 +18,15 @@ public class RentalPostResponse extends BaseDto {
 
     private Category category;
 
-
     private double latitude;
 
     private double longitude;
 
-
     private List<RentalPostFile> rentalPostFiles = new ArrayList<>();
-
 
     private List<UserAnswerDFormQuestionResponse> formQuestionsAnswer = new ArrayList<>();
 
-
     private Set<UserResponse> interestedPeople = new HashSet<>();
+
+    private boolean valid;
 }

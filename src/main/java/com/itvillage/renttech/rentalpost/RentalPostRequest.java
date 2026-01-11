@@ -10,6 +10,7 @@ import java.util.List;
 @Data
 public class RentalPostRequest extends BaseDto {
     private String categoryId;
+    private String rentPackageId;
     private List<UserAnswerDFormQuestionRequest> formQuestionsAnswer = new ArrayList<>();
 
 }

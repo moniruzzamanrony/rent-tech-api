@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -57,4 +58,7 @@ public class RentalPost extends MagicBaseModel implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> interestedPeople = new HashSet<>();
+
+    private boolean valid;
+    private ZonedDateTime expiryDate;
 }

@@ -5,10 +5,15 @@ import com.itvillage.renttech.base.dto.APIResponseDto;
 import com.itvillage.renttech.base.expection.MagicException;
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
+import com.itvillage.renttech.base.utils.DateTimeUtils;
 import com.itvillage.renttech.base.utils.FileUtils;
 import com.itvillage.renttech.base.utils.TokenUtils;
+import com.itvillage.renttech.rentpackages.PackageType;
+import com.itvillage.renttech.rentpackages.RentPackage;
+import com.itvillage.renttech.rentpackages.RentPackageRepository;
 import com.itvillage.renttech.signupreward.SignUpReward;
 import com.itvillage.renttech.signupreward.SignUpRewardService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,6 +26,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.ZonedDateTime;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
@@ -36,6 +42,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final SpaceService spaceService;
     private final SignUpRewardService signUpRewardService;
+    private final RentPackageRepository rentPackageRepository;
 
     @Value("${application.security.access.password}")
     private String accessPassword;
@@ -142,4 +149,53 @@ public class UserService {
     public List<User> getAllByIds(List<String> receiverIds) {
         return repository.findAllByIdIn(new HashSet<>(receiverIds));
     }
+
+    @Transactional
+    public APIResponseDto<UserResponse> purchasePackage(String packageId) {
+
+        User user = getById(TokenUtils.getCurrentUserId())
+                .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
+
+        RentPackage rentPackage = rentPackageRepository.findById(packageId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Package not found"));
+        if(!rentPackage.getPackageType().equals(PackageType.SEARCHING_PACKAGE))
+            throw new MagicException.BadRequestException("Package type not supported");
+
+        if (user.getCurrentCoins() < rentPackage.getPriceInCoins()) {
+            throw new MagicException.BadRequestException("Insufficient coins");
+        }
+        user.setCurrentCoins(user.getCurrentCoins() - rentPackage.getPriceInCoins());
+
+        // Create user package
+        UserPackage userPackage = UserPackage.builder()
+                .rentPackage(rentPackage)
+                .valid(true)
+                .expiryDate(
+                        DateTimeUtils.addDays(
+                                ZonedDateTime.now(),
+                                rentPackage.getValidityInDays()
+                        )
+                )
+                .build();
+
+        user.getUserPackages().add(userPackage);
+
+        // Single DB write (transactional)
+        User savedUser = repository.save(user);
+
+        return new APIResponseDto<>(HttpStatus.OK.value(), ConverterUtils.convert(savedUser));
+    }
+
+
+    public void deductCoins(int chargeCoins) {
+        User user = getById(TokenUtils.getCurrentUserId())
+                .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
+
+        if (user.getCurrentCoins() < chargeCoins) {
+            throw new MagicException.BadRequestException("Insufficient coins");
+        }
+        user.setCurrentCoins(user.getCurrentCoins() - chargeCoins);
+        repository.save(user);
+    }
+
 }

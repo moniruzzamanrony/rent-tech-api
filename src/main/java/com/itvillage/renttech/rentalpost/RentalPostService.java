@@ -4,6 +4,7 @@ package com.itvillage.renttech.rentalpost;
 import com.itvillage.renttech.base.expection.MagicException;
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
+import com.itvillage.renttech.base.utils.DateTimeUtils;
 import com.itvillage.renttech.base.utils.TokenUtils;
 import com.itvillage.renttech.category.CategoryService;
 import com.itvillage.renttech.dynamicform.DynamicFormQuestion;
@@ -11,6 +12,9 @@ import com.itvillage.renttech.dynamicform.DynamicFormService;
 import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestion;
 import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestionRequest;
 import com.itvillage.renttech.notification.NotificationService;
+import com.itvillage.renttech.rentpackages.PackageType;
+import com.itvillage.renttech.rentpackages.RentPackage;
+import com.itvillage.renttech.rentpackages.RentPackageRepository;
 import com.itvillage.renttech.verification.user.User;
 import com.itvillage.renttech.verification.user.UserService;
 import jakarta.transaction.Transactional;
@@ -19,6 +23,7 @@ import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +41,7 @@ public class RentalPostService {
     private final UserService userService;
     private final SpaceService spaceService;
     private final NotificationService notificationService;
+    private final RentPackageRepository rentPackageRepository;
 
     @Transactional
     public RentalPostResponse createRentalPost(RentalPostRequest request) {
@@ -91,8 +97,15 @@ public class RentalPostService {
             rentalPost.setFormQuestionsAnswer(answers);
         }
 
+        //Add RentPackage
+        RentPackage rentPackage = rentPackageRepository.findById(request.getRentPackageId()).orElseThrow(() -> new MagicException.NotFoundException("Rent package not found"));
+        if (!rentPackage.getPackageType().equals(PackageType.POST_ADS_PACKAGE))
+            throw new MagicException.NotFoundException("Invalid Package not supported.");
+        userService.deductCoins(rentPackage.getPriceInCoins());
+        if (rentPackage.getValidityInDays() != null)
+            rentalPost.setExpiryDate(DateTimeUtils.addDays(ZonedDateTime.now(), rentPackage.getValidityInDays()));
 
-        // Save RentalPost entity along with answers and files (cascading)
+        rentalPost.setValid(true);
         rentalPost = rentalPostRepository.save(rentalPost);
 
         // Convert entity to DTO to return to the client
@@ -153,7 +166,7 @@ public class RentalPostService {
         RentalPost rentalPost = rentalPostRepository.findById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
 
-        User interestedUser =userService.getById(TokenUtils.getCurrentUserId())
+        User interestedUser = userService.getById(TokenUtils.getCurrentUserId())
                 .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
         rentalPost.getInterestedPeople().add(interestedUser);
 
@@ -162,16 +175,16 @@ public class RentalPostService {
         notificationService.save(
                 ConverterUtils.createNotificationRequestDto(
                         List.of(rentalPost.getOwner().getId()),
-                        interestedUser.getName()+ " is interested in your rental post",
-                        "Post Id: " + rentalPost.getId() + "\n"+
-                               "Post Title: " + rentalPost.getFormQuestionsAnswer().getFirst().getAnswers().getFirst()));
+                        interestedUser.getName() + " is interested in your rental post",
+                        "Post Id: " + rentalPost.getId() + "\n" +
+                                "Post Title: " + rentalPost.getFormQuestionsAnswer().getFirst().getAnswers().getFirst()));
         return ConverterUtils.convert(rentalPost);
     }
 
     public List<RentalPostResponse> getMyRentalPost() {
         return rentalPostRepository.findAllByOwnerId(TokenUtils.getCurrentUserId())
                 .stream()
-                .map(rentalPost -> ConverterUtils.convert(rentalPost,List.of("category","formQuestionsAnswer","rentalPostFiles")))
+                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category", "formQuestionsAnswer", "rentalPostFiles")))
                 .collect(Collectors.toList());
     }
 
@@ -190,7 +203,7 @@ public class RentalPostService {
 
     public List<RentalPostResponse> getMyInterestedRentalPost() {
         return rentalPostRepository.findAllByInterestedUserId(TokenUtils.getCurrentUserId()).stream()
-                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category","owner","formQuestionsAnswer","rentalPostFiles")))
+                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category", "owner", "formQuestionsAnswer", "rentalPostFiles")))
                 .collect(Collectors.toList());
     }
 

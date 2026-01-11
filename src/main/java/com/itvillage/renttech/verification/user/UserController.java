@@ -45,4 +45,9 @@ public class UserController {
   public APIResponseDto<UserResponse> addCredit(@PathVariable int amount) {
     return userService.addCredit(amount);
   }
+
+  @PutMapping("/purchase-package/{packageId}")
+  public APIResponseDto<UserResponse> purchasePackage(@PathVariable String packageId) {
+    return userService.purchasePackage(packageId);
+  }
 }

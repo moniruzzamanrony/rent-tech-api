@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 @Repository
@@ -22,4 +23,6 @@ public interface RentalPostRepository extends JpaRepository<RentalPost, String> 
            WHERE u.id = :userId
            """)
     List<RentalPost> findAllByInterestedUserId(@Param("userId") String userId);
+
+    List<RentalPost> findAllByValidTrueAndExpiryDateBefore(ZonedDateTime now);
 }

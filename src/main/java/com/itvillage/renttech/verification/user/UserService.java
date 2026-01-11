@@ -15,6 +15,7 @@ import com.itvillage.renttech.signupreward.SignUpReward;
 import com.itvillage.renttech.signupreward.SignUpRewardService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -27,18 +28,20 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
 import static com.itvillage.renttech.base.utils.PhoneNumberUtils.isValidBDPhone;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class UserService {
 
     private final UserRepository repository;
+    private final UserPackageRepository userPackageRepository;
     private final PasswordEncoder passwordEncoder;
     private final SpaceService spaceService;
     private final SignUpRewardService signUpRewardService;
@@ -197,5 +200,27 @@ public class UserService {
         user.setCurrentCoins(user.getCurrentCoins() - chargeCoins);
         repository.save(user);
     }
+
+    @Transactional
+    public void makeInvalidExpiredPackages() {
+        List<UserPackage> expiredPackages = userPackageRepository
+                .findAllByValidTrueAndExpiryDateBefore(ZonedDateTime.now());
+
+        if (expiredPackages.isEmpty()) {
+            log.info("No expired user packages found to invalidate.");
+            return;
+        }
+
+        List<String> invalidatedIds = new ArrayList<>();
+        expiredPackages.forEach(userPackage -> {
+            userPackage.setValid(false);
+            invalidatedIds.add(userPackage.getId());
+        });
+
+        userPackageRepository.saveAll(expiredPackages);
+
+        log.info("Invalidated {} expired user packages: {}", expiredPackages.size(), invalidatedIds);
+    }
+
 
 }

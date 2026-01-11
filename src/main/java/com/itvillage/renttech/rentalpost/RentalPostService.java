@@ -19,6 +19,7 @@ import com.itvillage.renttech.verification.user.User;
 import com.itvillage.renttech.verification.user.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -30,7 +31,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class RentalPostService {
@@ -271,5 +272,22 @@ public class RentalPostService {
         rentalPost.getRentalPostFiles().forEach(file -> spaceService.deleteFile(file.getUrl()));
 
         rentalPostRepository.delete(rentalPost);
+    }
+
+    @Transactional
+    public void makeInvalidExpiredPost() {
+        List<RentalPost> rentalPosts = rentalPostRepository
+                .findAllByValidTrueAndExpiryDateBefore(ZonedDateTime.now());
+
+        if (rentalPosts.isEmpty()) {
+            log.info("No expired rental posts found to invalidate.");
+            return;
+        }
+
+        rentalPosts.forEach(rentalPost -> rentalPost.setValid(false));
+        rentalPostRepository.saveAll(rentalPosts);
+
+        log.info("Invalidated {} expired rental posts: {}", rentalPosts.size(),
+                rentalPosts.stream().map(RentalPost::getId).toList());
     }
 }

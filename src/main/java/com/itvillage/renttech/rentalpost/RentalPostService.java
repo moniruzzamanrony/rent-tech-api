@@ -10,6 +10,8 @@ import com.itvillage.renttech.dynamicform.DynamicFormQuestion;
 import com.itvillage.renttech.dynamicform.DynamicFormService;
 import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestion;
 import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestionRequest;
+import com.itvillage.renttech.notification.NotificationService;
+import com.itvillage.renttech.verification.user.User;
 import com.itvillage.renttech.verification.user.UserService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -33,6 +35,7 @@ public class RentalPostService {
     private final CategoryService categoryService;
     private final UserService userService;
     private final SpaceService spaceService;
+    private final NotificationService notificationService;
 
     @Transactional
     public RentalPostResponse createRentalPost(RentalPostRequest request) {
@@ -150,12 +153,18 @@ public class RentalPostService {
         RentalPost rentalPost = rentalPostRepository.findById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
 
-        rentalPost.getInterestedPeople().add(
-                userService.getById(TokenUtils.getCurrentUserId())
-                        .orElseThrow(() -> new MagicException.NotFoundException("User not found"))
-        );
+        User interestedUser =userService.getById(TokenUtils.getCurrentUserId())
+                .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
+        rentalPost.getInterestedPeople().add(interestedUser);
 
         rentalPost = rentalPostRepository.save(rentalPost);
+
+        notificationService.save(
+                ConverterUtils.createNotificationRequestDto(
+                        List.of(rentalPost.getOwner().getId()),
+                        interestedUser.getName()+ " is interested in your rental post",
+                        "Post Id: " + rentalPost.getId() + "\n"+
+                               "Post Title: " + rentalPost.getFormQuestionsAnswer().getFirst().getAnswers().getFirst()));
         return ConverterUtils.convert(rentalPost);
     }
 

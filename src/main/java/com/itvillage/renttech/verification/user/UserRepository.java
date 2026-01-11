@@ -27,4 +27,5 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
   int countByRole(Role role);
 
+  List<User> findAllByIdIn(Set<String> strings);
 }

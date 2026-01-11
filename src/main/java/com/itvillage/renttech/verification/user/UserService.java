@@ -7,6 +7,8 @@ import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
 import com.itvillage.renttech.base.utils.FileUtils;
 import com.itvillage.renttech.base.utils.TokenUtils;
+import com.itvillage.renttech.signupreward.SignUpReward;
+import com.itvillage.renttech.signupreward.SignUpRewardService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Value;
@@ -33,6 +35,7 @@ public class UserService {
     private final UserRepository repository;
     private final PasswordEncoder passwordEncoder;
     private final SpaceService spaceService;
+    private final SignUpRewardService signUpRewardService;
 
     @Value("${application.security.access.password}")
     private String accessPassword;
@@ -97,30 +100,21 @@ public class UserService {
         return repository.findById(id);
     }
 
-    public List<User> getAllByIds(List<String> ids) {
-        return repository.findByIdIn(new HashSet<>(ids));
-    }
-
-    public List<User> getUserByMobileNoNumbers(List<String> mobileNo) {
-        return repository.findByMobileNoIn(new HashSet<>(mobileNo));
-    }
 
 
     public User createUser(UserRequest request) {
         User user = new User();
         BeanUtils.copyProperties(request, user);
-
         user.setPassword(passwordEncoder.encode(accessPassword));
         user.setRole(request.getRole());
 
 
-        // Filter Signup Reward
-//    SignUpReward signUpReward =
-//        signUpRewardService.getAll().stream()
-//            .filter(signUpR -> signUpR.getRole().equals(request.getRole()))
-//            .findFirst()
-//            .orElse(new SignUpReward());
-        user.setCurrentCoins(0);
+    // Filter Signup Reward
+    SignUpReward signUpReward =
+        signUpRewardService.getAll().stream()
+            .findFirst()
+            .orElse(new SignUpReward());
+        user.setCurrentCoins(signUpReward.getNumberOfCoins());
 
         user = repository.save(user);
         return user;
@@ -135,30 +129,17 @@ public class UserService {
         return user;
     }
 
-//
-//    public void creditCoin(int priceInBDT, int coins, String desc) {
-//        String username = TokenUtils.getCurrentUserId();
-//        User user =
-//                this.getById(username)
-//                        .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
-//        int currentCoins = user.getCurrentCoins();
-//        int updatedCoins = currentCoins + coins;
-//        user.setCurrentCoins(updatedCoins);
-//        repository.save(user);
-//        coinHistoryService.creditCoinHistory(user, priceInBDT, coins, updatedCoins, desc);
-//    }
-//
-//    public void decodedCoin(int coins, String desc) {
-//        String username = TokenUtils.getCurrentUserId();
-//        User user =
-//                this.getById(username)
-//                        .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
-//        int currentCoins = user.getCurrentCoins();
-//        if (currentCoins < coins)
-//            throw new MagicException.NotPermittedException("Insufficient Balance.");
-//        int updatedCoins = currentCoins - coins;
-//        user.setCurrentCoins(updatedCoins);
-//        repository.save(user);
-//        coinHistoryService.expenseCoinHistory(user, coins, updatedCoins, desc);
-//    }
+    public APIResponseDto<UserResponse> addCredit(int amount) {
+        User user = getById(TokenUtils.getCurrentUserId())
+            .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
+
+    user.setCurrentCoins(user.getCurrentCoins() + amount);
+    repository.save(user);
+
+    return new APIResponseDto<>(HttpStatus.OK.value(), ConverterUtils.convert(user));
+    }
+
+    public List<User> getAllByIds(List<String> receiverIds) {
+        return repository.findAllByIdIn(new HashSet<>(receiverIds));
+    }
 }

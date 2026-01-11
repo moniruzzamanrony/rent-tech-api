@@ -40,4 +40,9 @@ public class UserController {
     Page<UserResponse> packages = userService.getUsers(page,size,role);
     return new APIResponseDto<>(HttpStatus.OK.value(), packages);
   }
+
+  @PutMapping("/add-credit/{amount}")
+  public APIResponseDto<UserResponse> addCredit(@PathVariable int amount) {
+    return userService.addCredit(amount);
+  }
 }

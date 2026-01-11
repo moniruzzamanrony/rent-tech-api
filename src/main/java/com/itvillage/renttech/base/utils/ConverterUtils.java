@@ -86,8 +86,8 @@ public class ConverterUtils {
     public static NotificationResponseDto convert(Notification notification) {
         NotificationResponseDto notificationResponseDto = new NotificationResponseDto();
         BeanUtils.copyProperties(notification, notificationResponseDto);
-        notificationResponseDto.setSender(notification.getSender());
-        notificationResponseDto.setReceiver(notification.getReceiver());
+        notificationResponseDto.setSender(ConverterUtils.convert(notification.getSender()));
+        notificationResponseDto.setReceiver(ConverterUtils.convert(notification.getReceiver()));
         return notificationResponseDto;
     }
 

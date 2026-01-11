@@ -21,13 +21,9 @@ public class UserResponse extends BaseDto {
 
   private String presentAddress;
 
-  private String password;
-
   private int currentCoins;
 
   private String profilePicUrl;
-
-  private Role role;
 
   private List<UserPackageResponse> userPackages = new ArrayList<>();
 }

@@ -25,7 +25,7 @@ public class UserAnswerDFormQuestion extends MagicBaseModel implements Serializa
 
     @ElementCollection(fetch = FetchType.LAZY)
     @CollectionTable(
-            name = "user_answer_dynamic_form_question_answer",
+            name = "user_answer_dynamic_form_question",
             joinColumns = @JoinColumn(name = "user_answer_id")
     )
     @Column(name = "answer", nullable = false)

@@ -2,12 +2,14 @@ package com.itvillage.renttech.dynamicform;
 
 
 import com.itvillage.renttech.base.expection.MagicException;
+import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
 import com.itvillage.renttech.category.Category;
 import com.itvillage.renttech.category.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -19,15 +21,20 @@ import java.util.Set;
 public class DynamicFormService {
     private final DynamicFormQuestionRepository dynamicFormQuestionRepository;
     private final QuestionOptionRepository questionOptionRepository;
+    private final UserAnswerDFormService userAnswerDFormService;
     private final CategoryService categoryService;
+    private final SpaceService spaceService;
 
 
-    public DynamicFormQuestionResponse createDynamicFormQuestion(DynamicFormQuestionRequest dynamicFormQuestionRequest) {
+    public DynamicFormQuestionResponse createDynamicFormQuestion(DynamicFormQuestionRequest dynamicFormQuestionRequest, MultipartFile file) {
         DynamicFormQuestion dynamicFormQuestion = new DynamicFormQuestion();
         BeanUtils.copyProperties(dynamicFormQuestionRequest, dynamicFormQuestion);
         Category category = categoryService.getById(dynamicFormQuestionRequest.getCategoryId());
         dynamicFormQuestion.setCategory(category);
-
+        if(file != null) {
+           String url = spaceService.uploadFile(file);
+           dynamicFormQuestion.setAnswerViewIconUrl(url);
+        }
         dynamicFormQuestion = dynamicFormQuestionRepository.save(dynamicFormQuestion);
 
         return ConverterUtils.convert(dynamicFormQuestion);
@@ -50,6 +57,8 @@ public class DynamicFormService {
     }
 
     public void deleteQuestion(String questionId) {
+        if(hasAnyAnswer(questionId))
+            throw new MagicException.NotPermittedException("Question has answers");
         Optional<DynamicFormQuestion> dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId);
         if (dynamicFormQuestion.isEmpty()) {
             throw new MagicException.NotFoundException("Question not found");
@@ -58,7 +67,13 @@ public class DynamicFormService {
 
     }
 
+    private boolean hasAnyAnswer(String questionId) {
+        return userAnswerDFormService.hasAnswerByQsId(questionId);
+    }
+
     public void deleteOptionOfQuestion(String questionId, String optionId) {
+        if(hasAnyAnswer(questionId))
+            throw new MagicException.NotPermittedException("Question has answers");
         Optional<DynamicFormQuestion> dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId);
         if (dynamicFormQuestion.isEmpty()) {
             throw new MagicException.NotFoundException("Question not found");

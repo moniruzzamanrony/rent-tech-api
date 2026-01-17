@@ -1,6 +1,8 @@
 package com.itvillage.renttech.base.utils;
 
 
+import com.itvillage.renttech.category.Category;
+import com.itvillage.renttech.category.CategoryResponse;
 import com.itvillage.renttech.dynamicform.*;
 import com.itvillage.renttech.notification.Notification;
 import com.itvillage.renttech.notification.NotificationRequestDto;
@@ -97,5 +99,11 @@ public class ConverterUtils {
         notificationDto.setTitle(title);
         notificationDto.setDetails(details);
         return notificationDto;
+    }
+
+    public static CategoryResponse convert(Category category) {
+        CategoryResponse categoryResponse = new CategoryResponse();
+        BeanUtils.copyProperties(category, categoryResponse);
+        return categoryResponse;
     }
 }

@@ -13,7 +13,7 @@ public class UserAnswerDFormService {
 
     private final UserAnswerDFormQuestionRepository userAnswerDFormQuestionRepository;
 
-    public void saveAnswers(List<UserAnswerDFormQuestion> userAnswerDFormQuestions) {
-        userAnswerDFormQuestionRepository.saveAll(userAnswerDFormQuestions);
+    public boolean hasAnswerByQsId(String questionId) {
+        return userAnswerDFormQuestionRepository.existsByDynamicFormQuestionId(questionId);
     }
 }

@@ -5,7 +5,9 @@ import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.dto.APIResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,10 +18,15 @@ public class DynamicFormController {
 
     private final DynamicFormService dynamicFormService;
 
-    @PostMapping()
-    public APIResponseDto<DynamicFormQuestionResponse> createDynamicFormQuestion(@RequestBody DynamicFormQuestionRequest request) {
-        return new APIResponseDto<>(HttpStatus.OK.value(), dynamicFormService.createDynamicFormQuestion(request));
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public APIResponseDto<DynamicFormQuestionResponse> createDynamicFormQuestion(
+            @RequestPart("request") DynamicFormQuestionRequest request,
+            @RequestPart(value = "file", required = false) MultipartFile file) {
+
+        return new APIResponseDto<>(HttpStatus.OK.value(),
+                dynamicFormService.createDynamicFormQuestion(request, file));
     }
+
 
     @PostMapping("/questions/{questionId}/options")
     public APIResponseDto<DynamicFormQuestionResponse> addOptionsInQuestion(@RequestBody QuestionOptionRequest request, @PathVariable String questionId) {

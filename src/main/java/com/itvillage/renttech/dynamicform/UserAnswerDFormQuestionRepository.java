@@ -5,4 +5,6 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface UserAnswerDFormQuestionRepository extends JpaRepository<UserAnswerDFormQuestion, String> {
+
+   boolean existsByDynamicFormQuestionId(String questionId);
 }

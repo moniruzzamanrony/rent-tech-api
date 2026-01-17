@@ -36,6 +36,12 @@ public class DynamicFormQuestion extends MagicBaseModel implements Serializable 
     @Column(name = "place_holder")
     private String placeHolder;
 
+    @Column(name = "qs_required", nullable = false)
+    private boolean qsRequired = false;
+
+    @Column(name = "answer_view_icon_url")
+    private String answerViewIconUrl;
+
     @OneToMany(
             mappedBy = "question",
             fetch = FetchType.LAZY,

@@ -16,7 +16,11 @@ public class DynamicFormQuestionResponse extends BaseDto {
 
     private String label;
 
+    private boolean qsRequired;
+
     private String placeHolder;
+
+    private String answerViewIconUrl;
 
     private List<QuestionOptionResponse> defaultOptions;
 }

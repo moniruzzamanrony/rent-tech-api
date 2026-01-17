@@ -13,6 +13,8 @@ public class DynamicFormQuestionRequest {
 
     private String placeHolder;
 
+    private boolean qsRequired;
+
     private InputType inputType;
 
     private int position;

@@ -10,7 +10,8 @@ import java.util.stream.Stream;
 public enum Gender {
 
     MALE(100),
-    FEMALE(101);
+    FEMALE(101),
+    OTHER(102);
 
     private final int code;
 

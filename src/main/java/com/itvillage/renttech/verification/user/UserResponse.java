@@ -14,7 +14,6 @@ public class UserResponse extends BaseDto {
 
   private String mobileNo;
 
-  @Convert(converter = Gender.GenderConverter.class)
   private Gender gender;
 
   private String nidNumber;
@@ -24,6 +23,10 @@ public class UserResponse extends BaseDto {
   private int currentCoins;
 
   private String profilePicUrl;
+
+  private Profession profession;
+
+  private String universityName;
 
   private List<UserPackageResponse> userPackages = new ArrayList<>();
 }

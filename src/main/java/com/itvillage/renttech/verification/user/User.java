@@ -34,6 +34,11 @@ public class User extends MagicBaseModel implements UserDetails, Serializable {
 
   private String presentAddress;
 
+  @Convert(converter = Profession.ProfessionConverter.class)
+  private Profession profession;
+
+  private String universityName;
+
   private String password;
 
   private int currentCoins;

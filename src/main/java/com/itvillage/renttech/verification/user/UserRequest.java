@@ -20,5 +20,9 @@ public class UserRequest {
 
   private String presentAddress;
 
+  private Profession profession;
+
+  private String universityName;
+
   private Role role;
 }

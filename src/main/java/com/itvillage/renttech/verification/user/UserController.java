@@ -1,8 +1,8 @@
 package com.itvillage.renttech.verification.user;
 
 
-
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.dto.APIResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -21,9 +21,13 @@ public class UserController {
 
   @PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
   public APIResponseDto<UserResponse> updateProfile(
-          @RequestPart("data") UserRequest request,
+          @RequestPart("data") String requestString,
           @RequestPart(value = "file", required = false) MultipartFile file
-  ) {
+  ) throws JsonProcessingException {
+    // Convert JSON string to object
+    ObjectMapper mapper = new ObjectMapper();
+    UserRequest request = mapper.readValue(requestString, UserRequest.class);
+
     return userService.updateProfile(request, file);
   }
 

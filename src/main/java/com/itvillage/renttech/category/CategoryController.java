@@ -1,7 +1,8 @@
 package com.itvillage.renttech.category;
 
 
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.controller.MagicController;
 import com.itvillage.renttech.base.dto.APIResponseDto;
@@ -25,8 +26,12 @@ public class CategoryController extends MagicController<CategoryService, Categor
     ///  wrrite a create api with multipart
     @PostMapping(path = "/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public APIResponseDto<CategoryResponse> createCategory(
-            @RequestPart("request") CategoryRequest request,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
+            @RequestPart("request") String requestString,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
+        // Convert JSON string to object
+        ObjectMapper mapper = new ObjectMapper();
+        CategoryRequest request = mapper.readValue(requestString, CategoryRequest.class);
+
         return new APIResponseDto<>(HttpStatus.OK.value(), categoryService.createCategory(request, file));
     }
 

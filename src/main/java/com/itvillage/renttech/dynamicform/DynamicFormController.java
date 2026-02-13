@@ -1,6 +1,8 @@
 package com.itvillage.renttech.dynamicform;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.dto.APIResponseDto;
 import lombok.RequiredArgsConstructor;
@@ -20,8 +22,11 @@ public class DynamicFormController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public APIResponseDto<DynamicFormQuestionResponse> createDynamicFormQuestion(
-            @RequestPart("request") DynamicFormQuestionRequest request,
-            @RequestPart(value = "file", required = false) MultipartFile file) {
+            @RequestPart("request") String requestString,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
+        // Convert JSON string to object
+        ObjectMapper mapper = new ObjectMapper();
+        DynamicFormQuestionRequest request = mapper.readValue(requestString, DynamicFormQuestionRequest.class);
 
         return new APIResponseDto<>(HttpStatus.OK.value(),
                 dynamicFormService.createDynamicFormQuestion(request, file));

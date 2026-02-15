@@ -13,8 +13,7 @@ public enum QuestionType {
     DROPDOWN(105),
     CHECKBOX(110),
     RADIO(115),
-    TEXTAREA(120),
-    MULTISELECT(125);
+    TEXTAREA(120);
 
     private final int code;
 

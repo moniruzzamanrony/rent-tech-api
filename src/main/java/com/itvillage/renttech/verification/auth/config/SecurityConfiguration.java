@@ -50,7 +50,7 @@ public class SecurityConfiguration {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOriginPatterns(List.of("http://localhost:5176","https://vromon-admin-panel-ygldg.ondigitalocean.app","https://manage.vromon.live")); // your Angular URL
+    config.setAllowedOriginPatterns(List.of("http://localhost:4700","https://vromon-admin-panel-ygldg.ondigitalocean.app","https://manage.vromon.live")); // your Angular URL
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
     config.setAllowCredentials(true);

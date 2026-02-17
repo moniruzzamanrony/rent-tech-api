@@ -78,17 +78,17 @@ public class RentalPostService {
             // Map each request answer to its entity, linking to the proper DynamicFormQuestion
             List<UserAnswerDFormQuestion> answers =
                     request.getFormQuestionsAnswer().stream()
-                            .map(req -> {
-                                DynamicFormQuestion question = questionMap.get(req.getDynamicFormQuestionId());
+                            .map(userAnswerDFormQuestion -> {
+                                DynamicFormQuestion question = questionMap.get(userAnswerDFormQuestion.getDynamicFormQuestionId());
                                 if (question == null) {
                                     throw new MagicException.NotFoundException(
-                                            "Dynamic question not found: " + req.getDynamicFormQuestionId()
+                                            "Dynamic question not found: " + userAnswerDFormQuestion.getDynamicFormQuestionId()
                                     );
                                 }
 
                                 UserAnswerDFormQuestion answer = new UserAnswerDFormQuestion();
                                 answer.setDynamicFormQuestion(question);
-                                answer.setAnswers(req.getAnswers());
+                                answer.setAnswers(userAnswerDFormQuestion.getAnswers());
                                 return answer;
                             })
                             .toList();

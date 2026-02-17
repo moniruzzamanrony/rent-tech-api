@@ -22,5 +22,9 @@ public class DynamicFormQuestionResponse extends BaseDto {
 
     private String answerViewIconUrl;
 
+    private InputType inputType;
+
+    private int position;
+
     private List<QuestionOptionResponse> defaultOptions;
 }

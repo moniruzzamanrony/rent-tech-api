@@ -55,7 +55,7 @@ public class CategoryService extends MagicService<Category, String> {
         priceDQ.setQuestionType(QuestionType.INPUT);
         priceDQ.setLabel("Price");
         priceDQ.setPlaceHolder("Enter your price");
-        priceDQ.setInputType(InputType.NUMERIC);
+        priceDQ.setInputType(InputType.DECIMAL);
         priceDQ.setPosition(0);
         priceDQ.setQsRequired(true);
 

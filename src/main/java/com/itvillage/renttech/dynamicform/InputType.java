@@ -11,6 +11,7 @@ public enum InputType {
 
     DATE(100),
     NUMERIC(105),
+    DECIMAL(115),
     TEXT(110);
 
     private final int code;

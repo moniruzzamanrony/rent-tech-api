@@ -3,12 +3,12 @@ package com.itvillage.renttech.category;
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.service.MagicService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
-import com.itvillage.renttech.dynamicform.DynamicFormQuestionRequest;
-import com.itvillage.renttech.dynamicform.DynamicFormService;
-import com.itvillage.renttech.dynamicform.InputType;
-import com.itvillage.renttech.dynamicform.QuestionType;
+import com.itvillage.renttech.dynamicform.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class CategoryService extends MagicService<Category, String> {
@@ -73,5 +73,20 @@ public class CategoryService extends MagicService<Category, String> {
         locationDQ.setQsRequired(true);
 
         dynamicFormService.createDynamicFormQuestion(locationDQ, null);
+    }
+
+    public CategoryResponse categoryActiveInActive(String catId, boolean active) {
+        Category category = categoryRepository.findById(catId)
+                .orElseThrow(() -> new RuntimeException("Category not found"));
+
+        category.setActive(active);
+        category = categoryRepository.save(category);
+
+        return  ConverterUtils.convert(category);
+    }
+
+    public List<CategoryResponse> getAllActiveCat() {
+        List<Category> categories = categoryRepository.findByActiveTrue();
+        return categories.stream().map(ConverterUtils::convert).collect(Collectors.toList());
     }
 }

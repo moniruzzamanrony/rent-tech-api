@@ -12,4 +12,5 @@ public class Category extends MagicBaseModel {
     private String name;
     private String iconUrl;
     private String description;
+    private boolean active;
 }

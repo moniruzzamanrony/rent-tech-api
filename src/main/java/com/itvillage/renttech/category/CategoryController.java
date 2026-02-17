@@ -8,11 +8,10 @@ import com.itvillage.renttech.base.controller.MagicController;
 import com.itvillage.renttech.base.dto.APIResponseDto;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequestMapping(ApiConstant.PRIVATE_BASE_API+"/category")
@@ -33,6 +32,17 @@ public class CategoryController extends MagicController<CategoryService, Categor
         CategoryRequest request = mapper.readValue(requestString, CategoryRequest.class);
 
         return new APIResponseDto<>(HttpStatus.OK.value(), categoryService.createCategory(request, file));
+    }
+
+    @PostMapping("/{catId}/active-inactive")
+    public APIResponseDto<CategoryResponse> categoryActiveInActive(@PathVariable String catId, @RequestParam boolean active) {
+        return new APIResponseDto<>(HttpStatus.OK.value(), categoryService.categoryActiveInActive(catId, active));
+    }
+
+    // ✅ NEW ENDPOINT TO FETCH DYNAMIC FORM QUESTIONS FOR A CATEGORY
+    @GetMapping("/all/active")
+    public APIResponseDto<List<CategoryResponse>> getAllActiveCat() {
+        return new APIResponseDto<>(HttpStatus.OK.value(), categoryService.getAllActiveCat());
     }
 
 }

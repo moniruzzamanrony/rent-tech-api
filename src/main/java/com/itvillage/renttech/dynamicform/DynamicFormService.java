@@ -1,11 +1,10 @@
 package com.itvillage.renttech.dynamicform;
 
-
 import com.itvillage.renttech.base.expection.MagicException;
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
 import com.itvillage.renttech.category.Category;
-import com.itvillage.renttech.category.CategoryService;
+import com.itvillage.renttech.category.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
@@ -15,56 +14,74 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-
 @Service
 @RequiredArgsConstructor
 public class DynamicFormService {
+
     private final DynamicFormQuestionRepository dynamicFormQuestionRepository;
     private final QuestionOptionRepository questionOptionRepository;
     private final UserAnswerDFormService userAnswerDFormService;
-    private final CategoryService categoryService;
+
+    // ✅ REPLACED CategoryService WITH CategoryRepository
+    private final CategoryRepository categoryRepository;
+
     private final SpaceService spaceService;
 
+    public DynamicFormQuestionResponse createDynamicFormQuestion(
+            DynamicFormQuestionRequest dynamicFormQuestionRequest,
+            MultipartFile file
+    ) {
 
-    public DynamicFormQuestionResponse createDynamicFormQuestion(DynamicFormQuestionRequest dynamicFormQuestionRequest, MultipartFile file) {
         DynamicFormQuestion dynamicFormQuestion = new DynamicFormQuestion();
         BeanUtils.copyProperties(dynamicFormQuestionRequest, dynamicFormQuestion);
-        Category category = categoryService.getById(dynamicFormQuestionRequest.getCategoryId());
+
+        // ✅ Fetch category directly from repository (NO service call)
+        Category category = categoryRepository.findById(
+                dynamicFormQuestionRequest.getCategoryId()
+        ).orElseThrow(() ->
+                new MagicException.NotFoundException("Category not found")
+        );
+
         dynamicFormQuestion.setCategory(category);
-        if(file != null) {
-           String url = spaceService.uploadFile(file);
-           dynamicFormQuestion.setAnswerViewIconUrl(url);
+
+        if (file != null && !file.isEmpty()) {
+            String url = spaceService.uploadFile(file);
+            dynamicFormQuestion.setAnswerViewIconUrl(url);
         }
+
         dynamicFormQuestion = dynamicFormQuestionRepository.save(dynamicFormQuestion);
 
         return ConverterUtils.convert(dynamicFormQuestion);
-
     }
 
     public DynamicFormQuestionResponse addOptionsInQuestion(String questionId, QuestionOptionRequest request) {
+
         if (questionOptionRepository.existsByValueAndQuestionId(request.getValue(), questionId))
             throw new MagicException.AlreadyExistsException("Question option value already exists");
-        Optional<DynamicFormQuestion> dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId);
-        if (dynamicFormQuestion.isEmpty()) {
-            throw new MagicException.NotFoundException("Question not found");
-        }
+
+        DynamicFormQuestion dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Question not found"));
+
         QuestionOption questionOption = new QuestionOption();
         BeanUtils.copyProperties(request, questionOption);
-        questionOption.setQuestion(dynamicFormQuestion.get());
+        questionOption.setQuestion(dynamicFormQuestion);
+
         questionOption = questionOptionRepository.save(questionOption);
-        dynamicFormQuestion.get().getDefaultOptions().add(questionOption);
-        return ConverterUtils.convert(dynamicFormQuestionRepository.save(dynamicFormQuestion.get()));
+
+        dynamicFormQuestion.getDefaultOptions().add(questionOption);
+
+        return ConverterUtils.convert(dynamicFormQuestionRepository.save(dynamicFormQuestion));
     }
 
     public void deleteQuestion(String questionId) {
-        if(hasAnyAnswer(questionId))
-            throw new MagicException.NotPermittedException("Question has answers");
-        Optional<DynamicFormQuestion> dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId);
-        if (dynamicFormQuestion.isEmpty()) {
-            throw new MagicException.NotFoundException("Question not found");
-        }
-        dynamicFormQuestionRepository.delete(dynamicFormQuestion.get());
 
+        if (hasAnyAnswer(questionId))
+            throw new MagicException.NotPermittedException("Question has answers");
+
+        DynamicFormQuestion dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Question not found"));
+
+        dynamicFormQuestionRepository.delete(dynamicFormQuestion);
     }
 
     private boolean hasAnyAnswer(String questionId) {
@@ -72,29 +89,34 @@ public class DynamicFormService {
     }
 
     public void deleteOptionOfQuestion(String questionId, String optionId) {
-        if(hasAnyAnswer(questionId))
+
+        if (hasAnyAnswer(questionId))
             throw new MagicException.NotPermittedException("Question has answers");
-        Optional<DynamicFormQuestion> dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId);
-        if (dynamicFormQuestion.isEmpty()) {
-            throw new MagicException.NotFoundException("Question not found");
-        }
-        Optional<QuestionOption> questionOption = questionOptionRepository.findById(optionId);
-        if (questionOption.isEmpty()) {
-            throw new MagicException.NotFoundException("Option not found");
-        }
-        dynamicFormQuestion.get().getDefaultOptions().remove(questionOption.get());
-        dynamicFormQuestionRepository.save(dynamicFormQuestion.get());
-        questionOptionRepository.delete(questionOption.get());
+
+        DynamicFormQuestion dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Question not found"));
+
+        QuestionOption questionOption = questionOptionRepository.findById(optionId)
+                .orElseThrow(() -> new MagicException.NotFoundException("Option not found"));
+
+        dynamicFormQuestion.getDefaultOptions().remove(questionOption);
+
+        dynamicFormQuestionRepository.save(dynamicFormQuestion);
+        questionOptionRepository.delete(questionOption);
     }
 
-
     public List<DynamicFormQuestionResponse> getFormBycCategoryId(String categoryId) {
-        List<DynamicFormQuestion>  dynamicFormQuestions = dynamicFormQuestionRepository.findAllByCategoryIdOrderByPositionAsc(categoryId);
-        return dynamicFormQuestions.stream().map(ConverterUtils::convert).toList();
+
+        List<DynamicFormQuestion> dynamicFormQuestions =
+                dynamicFormQuestionRepository
+                        .findAllByCategoryIdOrderByPositionAsc(categoryId);
+
+        return dynamicFormQuestions.stream()
+                .map(ConverterUtils::convert)
+                .toList();
     }
 
     public List<DynamicFormQuestion> getByIds(Set<String> questionIds) {
         return dynamicFormQuestionRepository.findAllByIdIn(questionIds);
-
     }
 }

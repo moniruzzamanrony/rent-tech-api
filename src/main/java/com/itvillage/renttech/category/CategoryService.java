@@ -1,36 +1,77 @@
 package com.itvillage.renttech.category;
 
-
-
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.service.MagicService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.itvillage.renttech.dynamicform.DynamicFormQuestionRequest;
+import com.itvillage.renttech.dynamicform.DynamicFormService;
+import com.itvillage.renttech.dynamicform.InputType;
+import com.itvillage.renttech.dynamicform.QuestionType;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 @Service
 public class CategoryService extends MagicService<Category, String> {
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private SpaceService spaceService;
-    public CategoryService(CategoryRepository repository) {
+
+    private final CategoryRepository categoryRepository;
+    private final DynamicFormService dynamicFormService;
+    private final SpaceService spaceService;
+
+    public CategoryService(
+            CategoryRepository repository,
+            DynamicFormService dynamicFormService,
+            SpaceService spaceService
+    ) {
         super(repository);
-        categoryRepository = repository;
+        this.categoryRepository = repository;
+        this.dynamicFormService = dynamicFormService;
+        this.spaceService = spaceService;
     }
 
     public CategoryResponse createCategory(CategoryRequest request, MultipartFile file) {
+
         Category category = new Category();
         category.setName(request.getName());
         category.setDescription(request.getDescription());
 
-         if (file != null && !file.isEmpty()) {
-             String iconUrl = spaceService.uploadFile(file);
-             category.setIconUrl(iconUrl);
-         }
+        if (file != null && !file.isEmpty()) {
+            String iconUrl = spaceService.uploadFile(file);
+            category.setIconUrl(iconUrl);
+        }
+
         category = categoryRepository.save(category);
 
+        createSystemDynamicQuestions(category.getId());
 
         return ConverterUtils.convert(category);
+    }
+
+    private void createSystemDynamicQuestions(String categoryId) {
+
+        // PRICE QUESTION
+        DynamicFormQuestionRequest priceDQ = new DynamicFormQuestionRequest();
+        priceDQ.setId("SYS_PRICE_QS_" + categoryId.substring(4));
+        priceDQ.setCategoryId(categoryId);
+        priceDQ.setQuestionType(QuestionType.INPUT);
+        priceDQ.setLabel("Price");
+        priceDQ.setPlaceHolder("Enter your price");
+        priceDQ.setInputType(InputType.NUMERIC);
+        priceDQ.setPosition(0);
+        priceDQ.setQsRequired(true);
+
+        dynamicFormService.createDynamicFormQuestion(priceDQ, null);
+
+        // LOCATION QUESTION
+        DynamicFormQuestionRequest locationDQ = new DynamicFormQuestionRequest();
+        locationDQ.setId("SYS_LOCATION_QS_" + categoryId.substring(4));
+        locationDQ.setCategoryId(categoryId);
+        locationDQ.setQuestionType(QuestionType.INPUT);
+        locationDQ.setLabel("Location");
+        locationDQ.setPlaceHolder("Enter lat long");
+        locationDQ.setInputType(InputType.TEXT);
+        locationDQ.setPosition(2);
+        locationDQ.setQsRequired(true);
+
+        dynamicFormService.createDynamicFormQuestion(locationDQ, null);
     }
 }

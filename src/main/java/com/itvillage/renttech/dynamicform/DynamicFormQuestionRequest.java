@@ -5,6 +5,8 @@ import lombok.Data;
 @Data
 public class DynamicFormQuestionRequest {
 
+    private String id;
+
     private String categoryId;
 
     private QuestionType questionType;

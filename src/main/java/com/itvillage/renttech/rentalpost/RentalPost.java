@@ -33,9 +33,11 @@ public class RentalPost extends MagicBaseModel implements Serializable {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    //Todo: will be remove
     @Column(nullable = false)
     private double latitude;
 
+    //Todo: will be remove
     @Column(nullable = false)
     private double longitude;
 

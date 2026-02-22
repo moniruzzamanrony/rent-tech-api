@@ -53,7 +53,7 @@ public class ConverterUtils {
 
     public static RentalPostResponse convert(RentalPost rentalPost) {
         RentalPostResponse rentalPostResponse = new RentalPostResponse();
-        BeanUtils.copyProperties(rentalPost, rentalPostResponse,"rentalPostFiles", "category");
+        BeanUtils.copyProperties(rentalPost, rentalPostResponse,"owner","formQuestionsAnswer","rentalPostFiles", "category","interestedPeople");
         rentalPostResponse.setCategory(rentalPost.getCategory());
         rentalPostResponse.setOwner(convert(rentalPost.getOwner()));
         rentalPostResponse.setFormQuestionsAnswer(rentalPost.getFormQuestionsAnswer().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
@@ -80,8 +80,9 @@ public class ConverterUtils {
 
     private static UserAnswerDFormQuestionResponse convert(UserAnswerDFormQuestion userAnswerDFormQuestion) {
         UserAnswerDFormQuestionResponse userAnswerDFormQuestionResponse = new UserAnswerDFormQuestionResponse();
-        BeanUtils.copyProperties(userAnswerDFormQuestion, userAnswerDFormQuestionResponse);
+        BeanUtils.copyProperties(userAnswerDFormQuestion, userAnswerDFormQuestionResponse, "answers");
         userAnswerDFormQuestionResponse.setQuestion(convert(userAnswerDFormQuestion.getDynamicFormQuestion()));
+        userAnswerDFormQuestionResponse.setAnswers(userAnswerDFormQuestion.getAnswersAsStrings());
         return userAnswerDFormQuestionResponse;
     }
 

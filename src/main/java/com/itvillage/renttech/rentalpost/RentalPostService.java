@@ -25,10 +25,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -88,7 +85,7 @@ public class RentalPostService {
 
                                 UserAnswerDFormQuestion answer = new UserAnswerDFormQuestion();
                                 answer.setDynamicFormQuestion(question);
-                                answer.setAnswers(userAnswerDFormQuestion.getAnswers());
+                                answer.setAnswersFromStrings(userAnswerDFormQuestion.getAnswers());
                                 return answer;
                             })
                             .toList();
@@ -107,6 +104,15 @@ public class RentalPostService {
             rentalPost.setExpiryDate(DateTimeUtils.addDays(ZonedDateTime.now(), rentPackage.getValidityInDays()));
 
         rentalPost.setValid(true);
+        //Manage Lat long
+        Optional<UserAnswerDFormQuestionRequest> dFormQuestionRequestOptional = request.getFormQuestionsAnswer().stream().filter(userAnswerDFormQuestionRequest -> userAnswerDFormQuestionRequest.getDynamicFormQuestionId().startsWith("SYS_LOCATION")).findFirst();
+        if(dFormQuestionRequestOptional.isPresent())
+        {
+            UserAnswerDFormQuestionRequest userAnswerDFormQuestionRequest = dFormQuestionRequestOptional.get();
+            String[] latLong =  userAnswerDFormQuestionRequest.getAnswers().getFirst().split(",");
+            rentalPost.setLatitude(Double.parseDouble(latLong[0]));
+            rentalPost.setLongitude(Double.parseDouble(latLong[1]));
+        }
         rentalPost = rentalPostRepository.save(rentalPost);
 
         // Convert entity to DTO to return to the client
@@ -245,12 +251,12 @@ public class RentalPostService {
                 UserAnswerDFormQuestion answer = existingAnswerMap.get(req.getDynamicFormQuestionId());
                 if (answer != null) {
                     // Update existing answer
-                    answer.setAnswers(req.getAnswers());
+                    answer.setAnswersFromStrings(req.getAnswers());
                 } else {
                     // Create new answer if it doesn't exist
                     answer = new UserAnswerDFormQuestion();
                     answer.setDynamicFormQuestion(question);
-                    answer.setAnswers(req.getAnswers());
+                    answer.setAnswersFromStrings(req.getAnswers());
                 }
                 updatedAnswers.add(answer);
             }

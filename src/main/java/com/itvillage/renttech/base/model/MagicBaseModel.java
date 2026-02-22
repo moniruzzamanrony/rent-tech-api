@@ -22,7 +22,7 @@ public class MagicBaseModel implements Serializable {
     private static final long serialVersionUID = 6126305011944974281L;
 
     @Id
-    @Column(length = 10, nullable = false, updatable = false)
+    @Column(length = 50, nullable = false, updatable = false)
     private String id;
 
     @Version

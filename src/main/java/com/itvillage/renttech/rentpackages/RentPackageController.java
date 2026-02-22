@@ -12,4 +12,7 @@ public class RentPackageController extends MagicController<RentPackageService, R
     public RentPackageController(RentPackageService service) {
         super(service);
     }
+
+    // get all packages by PackageType
+    // TODO: In app we used filter please remove that and use dedicated API
 }

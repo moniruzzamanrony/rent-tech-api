@@ -32,7 +32,7 @@ spring:
       ddl-auto: update   # create | create-drop | validate | none
     properties:
       hibernate:
-        show_sql: false
+        show_sql: true
 
   # ===============================
   # Jackson

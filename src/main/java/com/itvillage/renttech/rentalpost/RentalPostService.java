@@ -21,6 +21,8 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -188,11 +190,11 @@ public class RentalPostService {
         return ConverterUtils.convert(rentalPost);
     }
 
-    public List<RentalPostResponse> getMyRentalPost() {
-        return rentalPostRepository.findAllByOwnerId(TokenUtils.getCurrentUserId())
-                .stream()
-                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category", "formQuestionsAnswer", "rentalPostFiles")))
-                .collect(Collectors.toList());
+    @Transactional()
+    public Page<RentalPostResponse> getMyRentalPost(Pageable pageable) {
+        return rentalPostRepository
+                .findByOwner_IdOrderByModifiedDateDesc(TokenUtils.getCurrentUserId(), pageable)
+                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category")));
     }
 
     public RentalPostResponse getPostDetails(String rentalId) {
@@ -204,13 +206,13 @@ public class RentalPostService {
     public List<RentalPostResponse> getPostLocationByCategory(String categoryId) {
         List<RentalPost> rentalPosts = rentalPostRepository.findAllByCategoryId(categoryId);
         return rentalPosts.stream()
-                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("formQuestionsAnswer")))
+                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of()))
                 .collect(Collectors.toList());
     }
 
     public List<RentalPostResponse> getMyInterestedRentalPost() {
         return rentalPostRepository.findAllByInterestedUserId(TokenUtils.getCurrentUserId()).stream()
-                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category", "owner", "formQuestionsAnswer", "rentalPostFiles")))
+                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category")))
                 .collect(Collectors.toList());
     }
 

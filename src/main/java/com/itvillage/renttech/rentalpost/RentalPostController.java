@@ -4,6 +4,9 @@ package com.itvillage.renttech.rentalpost;
 import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.dto.APIResponseDto;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -57,8 +60,9 @@ public class RentalPostController {
     }
 
     @GetMapping("/my-post")
-    public APIResponseDto<List<RentalPostResponse>> getMyRentalPost() {
-        List<RentalPostResponse> responses = rentalPostService.getMyRentalPost();
+    public APIResponseDto<Page<RentalPostResponse>> getMyRentalPost(
+            @PageableDefault(size = 10) Pageable pageable) {
+        Page<RentalPostResponse> responses = rentalPostService.getMyRentalPost(pageable);
         return new APIResponseDto<>(HttpStatus.OK.value(), responses);
     }
 

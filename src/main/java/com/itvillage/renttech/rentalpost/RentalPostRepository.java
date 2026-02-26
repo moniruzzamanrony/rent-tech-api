@@ -1,5 +1,8 @@
 package com.itvillage.renttech.rentalpost;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -10,8 +13,8 @@ import java.util.List;
 
 @Repository
 public interface RentalPostRepository extends JpaRepository<RentalPost, String> {
-
-    List<RentalPost> findAllByOwnerId(String currentUserId);
+    @EntityGraph(attributePaths = {"category", "owner"})
+    Page<RentalPost> findByOwner_IdOrderByModifiedDateDesc(String ownerId, Pageable pageable);
 
     @Query("SELECT r FROM RentalPost r JOIN FETCH r.category c WHERE c.id = :categoryId")
     List<RentalPost> findAllByCategoryId(@Param("categoryId") String categoryId);

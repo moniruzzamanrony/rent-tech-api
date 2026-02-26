@@ -18,6 +18,8 @@ public class DynamicFormQuestionResponse extends BaseDto {
 
     private boolean qsRequired;
 
+    private PurposeType purposeType;
+
     private String placeHolder;
 
     private String answerViewIconUrl;

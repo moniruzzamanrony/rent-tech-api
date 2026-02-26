@@ -206,7 +206,7 @@ public class RentalPostService {
     public List<RentalPostResponse> getPostLocationByCategory(String categoryId) {
         List<RentalPost> rentalPosts = rentalPostRepository.findAllByCategoryId(categoryId);
         return rentalPosts.stream()
-                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of()))
+                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("formQuestionsAnswer")))
                 .collect(Collectors.toList());
     }
 

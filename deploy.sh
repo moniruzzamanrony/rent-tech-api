@@ -2,10 +2,12 @@
 
 set -e  # stop script if any command fails
 
+APP_NAME='rent_tech'
 PASSWORD='SuSeba@00#SuSeba'
-JAR_LOCAL="./target/rent-tech-api-0.0.1-SNAPSHOT.jar"
+JAR_NAME="rent-tech-api-0.0.1-SNAPSHOT.jar"
+JAR_LOCAL="./target/$JAR_NAME"
 REMOTE="root@209.97.161.90"
-REMOTE_PATH="/home/jar/rent-tech-api-0.0.1-SNAPSHOT.jar"
+REMOTE_PATH="/home/jar/$JAR_NAME"
 LOG_FILE="deploy.log"
 
 # Redirect ALL output (stdout + stderr) to log file
@@ -16,7 +18,7 @@ echo "Deployment started at $(date)"
 echo "===================================="
 
 echo "Stopping old application..."
-if ! sshpass -p "$PASSWORD" ssh $REMOTE "pkill -f rent-tech-api-0.0.1-SNAPSHOT.jar || true"; then
+if ! sshpass -p "$PASSWORD" ssh $REMOTE "pkill -f $JAR_NAME || true"; then
   echo "⚠ Failed to stop old application"
 fi
 
@@ -33,7 +35,7 @@ fi
 
 echo "Starting application..."
 if ! sshpass -p "$PASSWORD" ssh $REMOTE "
-nohup java -jar $REMOTE_PATH > /home/jar/app.log 2>&1 &
+nohup java -jar $REMOTE_PATH > /home/jar/$APP_NAME.log 2>&1 &
 "; then
   echo "❌ Failed to start application"
   exit 1

@@ -7,4 +7,5 @@ import lombok.Data;
 public class QuestionOptionResponse extends BaseDto {
     private String name;
     private int value;
+    private String iconUrl;
 }

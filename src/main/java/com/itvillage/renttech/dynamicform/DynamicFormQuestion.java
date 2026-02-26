@@ -26,6 +26,10 @@ public class DynamicFormQuestion extends MagicBaseModel implements Serializable 
     @Column(name = "question_type", nullable = false)
     private QuestionType questionType;
 
+    @Convert(converter = PurposeType.PurposeTypeConverter.class)
+    @Column(name = "purpose_type", nullable = false)
+    private PurposeType purposeType;
+
     @Convert(converter = InputType.InputTypeConverter.class)
     @Column(name = "input_type")
     private InputType inputType;

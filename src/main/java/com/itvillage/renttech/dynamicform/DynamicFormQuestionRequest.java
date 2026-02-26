@@ -9,6 +9,8 @@ public class DynamicFormQuestionRequest {
 
     private String categoryId;
 
+    private PurposeType purposeType;
+
     private QuestionType questionType;
 
     private String label;

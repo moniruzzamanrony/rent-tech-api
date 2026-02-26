@@ -20,6 +20,8 @@ public class QuestionOption extends MagicBaseModel implements Serializable {
 
     private int value;
 
+    private String iconUrl;
+
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "question_id", nullable = false)
     private DynamicFormQuestion question;

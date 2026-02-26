@@ -33,9 +33,20 @@ public class DynamicFormController {
     }
 
 
-    @PostMapping("/questions/{questionId}/options")
-    public APIResponseDto<DynamicFormQuestionResponse> addOptionsInQuestion(@RequestBody QuestionOptionRequest request, @PathVariable String questionId) {
-        return new APIResponseDto<>(HttpStatus.OK.value(), dynamicFormService.addOptionsInQuestion(questionId, request));
+    @PostMapping(
+            value = "/questions/{questionId}/options",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public APIResponseDto<DynamicFormQuestionResponse> addOptionsInQuestion(
+            @PathVariable String questionId,
+            @RequestPart("data") String requestString,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        QuestionOptionRequest request = mapper.readValue(requestString, QuestionOptionRequest.class);
+        DynamicFormQuestionResponse response =
+                dynamicFormService.addOptionsInQuestion(questionId, request, file);
+        return new APIResponseDto<>(HttpStatus.OK.value(), response);
     }
 
     @DeleteMapping("/questions/{questionId}")

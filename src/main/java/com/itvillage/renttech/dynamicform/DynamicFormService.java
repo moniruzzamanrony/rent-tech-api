@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -54,7 +53,7 @@ public class DynamicFormService {
         return ConverterUtils.convert(dynamicFormQuestion);
     }
 
-    public DynamicFormQuestionResponse addOptionsInQuestion(String questionId, QuestionOptionRequest request) {
+    public DynamicFormQuestionResponse addOptionsInQuestion(String questionId, QuestionOptionRequest request, MultipartFile file) {
 
         if (questionOptionRepository.existsByValueAndQuestionId(request.getValue(), questionId))
             throw new MagicException.AlreadyExistsException("Question option value already exists");
@@ -65,7 +64,10 @@ public class DynamicFormService {
         QuestionOption questionOption = new QuestionOption();
         BeanUtils.copyProperties(request, questionOption);
         questionOption.setQuestion(dynamicFormQuestion);
-
+        if (file != null && !file.isEmpty()) {
+            String url = spaceService.uploadFile(file);
+            questionOption.setIconUrl(url);
+        }
         questionOption = questionOptionRepository.save(questionOption);
 
         dynamicFormQuestion.getDefaultOptions().add(questionOption);

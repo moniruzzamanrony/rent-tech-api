@@ -54,9 +54,10 @@ public class CategoryService extends MagicService<Category, String> {
         priceDQ.setCategoryId(categoryId);
         priceDQ.setQuestionType(QuestionType.INPUT);
         priceDQ.setLabel("Price");
+        priceDQ.setPurposeType(PurposeType.OTHERS);
         priceDQ.setPlaceHolder("Enter your price");
         priceDQ.setInputType(InputType.DECIMAL);
-        priceDQ.setPosition(0);
+        priceDQ.setPosition(1);
         priceDQ.setQsRequired(true);
 
         dynamicFormService.createDynamicFormQuestion(priceDQ, null);
@@ -67,12 +68,38 @@ public class CategoryService extends MagicService<Category, String> {
         locationDQ.setCategoryId(categoryId);
         locationDQ.setQuestionType(QuestionType.INPUT);
         locationDQ.setLabel("Location");
+        locationDQ.setPurposeType(PurposeType.OTHERS);
         locationDQ.setPlaceHolder("Enter lat long");
         locationDQ.setInputType(InputType.TEXT);
         locationDQ.setPosition(2);
         locationDQ.setQsRequired(true);
-
         dynamicFormService.createDynamicFormQuestion(locationDQ, null);
+
+        // POST TITLE QUESTION
+        DynamicFormQuestionRequest postTitle = new DynamicFormQuestionRequest();
+        postTitle.setId("SYS_TITLE_QS_" + categoryId.substring(4));
+        postTitle.setCategoryId(categoryId);
+        postTitle.setQuestionType(QuestionType.INPUT);
+        postTitle.setLabel("Post Title");
+        postTitle.setPurposeType(PurposeType.OTHERS);
+        postTitle.setPlaceHolder("Enter Post Title");
+        postTitle.setInputType(InputType.TEXT);
+        postTitle.setPosition(3);
+        postTitle.setQsRequired(true);
+        dynamicFormService.createDynamicFormQuestion(postTitle, null);
+
+        // POST TITLE QUESTION
+        DynamicFormQuestionRequest addressQs = new DynamicFormQuestionRequest();
+        addressQs.setId("SYS_ADDRESS_QS_" + categoryId.substring(4));
+        addressQs.setCategoryId(categoryId);
+        addressQs.setQuestionType(QuestionType.INPUT);
+        addressQs.setLabel("Address");
+        addressQs.setPurposeType(PurposeType.OTHERS);
+        addressQs.setPlaceHolder("Enter Address");
+        addressQs.setInputType(InputType.TEXT);
+        addressQs.setPosition(4);
+        addressQs.setQsRequired(true);
+        dynamicFormService.createDynamicFormQuestion(addressQs, null);
     }
 
     public CategoryResponse categoryActiveInActive(String catId, boolean active) {

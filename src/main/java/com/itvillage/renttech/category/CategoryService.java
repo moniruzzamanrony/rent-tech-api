@@ -100,6 +100,19 @@ public class CategoryService extends MagicService<Category, String> {
         addressQs.setPosition(4);
         addressQs.setQsRequired(true);
         dynamicFormService.createDynamicFormQuestion(addressQs, null);
+
+        // POST TITLE QUESTION
+        DynamicFormQuestionRequest availableFromQs = new DynamicFormQuestionRequest();
+        availableFromQs.setId("SYS_AVAILABLE_FROM_QS_" + categoryId.substring(4));
+        availableFromQs.setCategoryId(categoryId);
+        availableFromQs.setQuestionType(QuestionType.INPUT);
+        availableFromQs.setLabel("Available From");
+        availableFromQs.setPurposeType(PurposeType.OTHERS);
+        availableFromQs.setPlaceHolder("Enter Available Date");
+        availableFromQs.setInputType(InputType.DATE);
+        availableFromQs.setPosition(5);
+        availableFromQs.setQsRequired(true);
+        dynamicFormService.createDynamicFormQuestion(availableFromQs, null);
     }
 
     public CategoryResponse categoryActiveInActive(String catId, boolean active) {

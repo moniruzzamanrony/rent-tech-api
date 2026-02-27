@@ -13,7 +13,7 @@ import lombok.*;
 @Table(name = "user_answer_values")
 public class UserAnswerValue extends MagicBaseModel { // Inheriting ID from your base model
 
-    @Column(name = "answer", nullable = false)
+    @Column(name = "answer", nullable = false, columnDefinition = "TEXT")
     private String answer;
 
     @ManyToOne(fetch = FetchType.LAZY)

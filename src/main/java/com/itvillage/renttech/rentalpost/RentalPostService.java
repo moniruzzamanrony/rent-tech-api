@@ -194,13 +194,13 @@ public class RentalPostService {
     public Page<RentalPostResponse> getMyRentalPost(Pageable pageable) {
         return rentalPostRepository
                 .findByOwner_IdOrderByModifiedDateDesc(TokenUtils.getCurrentUserId(), pageable)
-                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category")));
+                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category","formQuestionsAnswer")));
     }
 
     public RentalPostResponse getPostDetails(String rentalId) {
         RentalPost rentalPost = rentalPostRepository.findById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
-        return ConverterUtils.convert(rentalPost);
+        return ConverterUtils.convert(rentalPost,List.of("category","owner","formQuestionsAnswer","rentalPostFiles","interestedPeople"));
     }
 
     public List<RentalPostResponse> getPostLocationByCategory(String categoryId) {

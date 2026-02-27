@@ -12,4 +12,5 @@ public interface DynamicFormQuestionRepository extends JpaRepository<DynamicForm
     List<DynamicFormQuestion> findAllByCategoryIdOrderByPositionAsc(String categoryId);
 
     List<DynamicFormQuestion> findAllByIdIn(Set<String> questionIds);
+    boolean existsByCategoryIdAndPurposeType(String catId, PurposeType purposeType);
 }

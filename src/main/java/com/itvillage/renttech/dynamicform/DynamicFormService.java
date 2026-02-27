@@ -31,6 +31,12 @@ public class DynamicFormService {
             MultipartFile file
     ) {
 
+        if(dynamicFormQuestionRequest.getPurposeType().equals(PurposeType.AMENITIES))
+        {
+            if(dynamicFormQuestionRepository.existsByCategoryIdAndPurposeType(dynamicFormQuestionRequest.getCategoryId(), PurposeType.AMENITIES)){
+                throw new MagicException.AlreadyExistsException("Amenities already exists");
+        }
+        }
         DynamicFormQuestion dynamicFormQuestion = new DynamicFormQuestion();
         BeanUtils.copyProperties(dynamicFormQuestionRequest, dynamicFormQuestion);
 

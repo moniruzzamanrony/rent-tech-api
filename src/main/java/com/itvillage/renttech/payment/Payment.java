@@ -1,18 +1,14 @@
 package com.itvillage.renttech.payment;
 
 import com.itvillage.renttech.base.model.MagicBaseModel;
-import com.itvillage.renttech.verification.user.UserPackage;
-import jakarta.persistence.*;
+import jakarta.persistence.Convert;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Lob;
 import lombok.Data;
-
-import java.math.BigDecimal;
 
 @Entity
 @Data
 public class Payment extends MagicBaseModel {
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private UserPackage userPackage;
 
     // Order ID / Merchant Order ID
     private String orderId;
@@ -25,6 +21,8 @@ public class Payment extends MagicBaseModel {
 
     // Amount in BDT
     private double amount;
+
+    private int coinQty;
 
     // Payment status
     @Convert(converter = PaymentStatus.PaymentStatusConverter.class)

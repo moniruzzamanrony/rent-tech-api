@@ -1,4 +1,4 @@
-package com.itvillage.renttech.payment;
+package com.itvillage.renttech.payment.eps;
 
 import lombok.Data;
 

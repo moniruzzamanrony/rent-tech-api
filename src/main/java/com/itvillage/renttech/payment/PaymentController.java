@@ -1,5 +1,8 @@
 package com.itvillage.renttech.payment;
 
+import com.itvillage.renttech.payment.eps.EpsPaymentResponse;
+import com.itvillage.renttech.payment.eps.EpsPaymentService;
+import com.itvillage.renttech.payment.eps.EpsTokenResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,7 +22,7 @@ public class PaymentController {
      * Create payment session
      */
     @PostMapping("/create")
-    public EpsPaymentResponse createPayment(@RequestBody EpsCreatePaymentRequest request) {
+    public EpsPaymentResponse createPayment(@RequestBody PaymentRequest request) {
         return epsPaymentService.createPayment(request);
     }
 
@@ -28,12 +31,10 @@ public class PaymentController {
      */
     @GetMapping("/success")
     public String paymentSuccess(
-            @RequestParam String TransactionId,
-            @RequestParam String Status,
-            @RequestParam String OrderId
+            @RequestParam String data
     ) {
-        epsPaymentService.updatePaymentStatus(TransactionId, Status);
-        return "Payment SUCCESS for order: " + OrderId;
+        epsPaymentService.updatePaymentStatus(data);
+        return "Payment SUCCESS for order";
     }
 
     /**
@@ -41,12 +42,10 @@ public class PaymentController {
      */
     @GetMapping("/fail")
     public String paymentFailed(
-            @RequestParam String TransactionId,
-            @RequestParam String Status,
-            @RequestParam String OrderId
+            @RequestParam String data
     ) {
-        epsPaymentService.updatePaymentStatus(TransactionId, Status);
-        return "Payment FAILED for order: " + OrderId;
+        epsPaymentService.updatePaymentStatus(data);
+        return "Payment FAILED for order " ;
     }
 
     /**
@@ -54,12 +53,10 @@ public class PaymentController {
      */
     @GetMapping("/cancel")
     public String paymentCancelled(
-            @RequestParam String TransactionId,
-            @RequestParam String Status,
-            @RequestParam String OrderId
+            @RequestParam String data
     ) {
-        epsPaymentService.updatePaymentStatus(TransactionId, Status);
-        return "Payment CANCELLED for order: " + OrderId;
+        epsPaymentService.updatePaymentStatus(data);
+        return "Payment CANCELLED for order";
     }
 
     /**

@@ -1,5 +1,4 @@
-package com.itvillage.renttech.payment;
-import com.fasterxml.jackson.annotation.JsonProperty;
+package com.itvillage.renttech.payment.eps;
 import lombok.Data;
 
 import java.time.LocalDateTime;

@@ -1,4 +1,4 @@
-package com.itvillage.renttech.payment;
+package com.itvillage.renttech.payment.eps;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;

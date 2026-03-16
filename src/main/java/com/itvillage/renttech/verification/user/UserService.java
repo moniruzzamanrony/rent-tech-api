@@ -140,13 +140,28 @@ public class UserService {
     }
 
     public APIResponseDto<UserResponse> addCredit(int amount) {
-        User user = getById(TokenUtils.getCurrentUserId())
-            .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
+        User user = addCoins(amount);
 
-    user.setCurrentCoins(user.getCurrentCoins() + amount);
-    repository.save(user);
+        return new APIResponseDto<>(HttpStatus.OK.value(), ConverterUtils.convert(user));
+    }
 
-    return new APIResponseDto<>(HttpStatus.OK.value(), ConverterUtils.convert(user));
+    public User addCoins(int amount) {
+        try {
+            User user = getById(TokenUtils.getCurrentUserId())
+                    .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
+
+            user.setCurrentCoins(user.getCurrentCoins() + amount);
+            repository.save(user);
+            return user;
+        } catch (MagicException.NotFoundException e) {
+            // Handle user not found specifically
+            System.err.println("Error: " + e.getMessage());
+            throw e; // or return null, depending on your logic
+        } catch (Exception e) {
+            // Handle any other unexpected exceptions
+            System.err.println("Unexpected error while adding coins: " + e.getMessage());
+            throw new RuntimeException("Failed to add coins", e);
+        }
     }
 
     public List<User> getAllByIds(List<String> receiverIds) {
@@ -154,7 +169,12 @@ public class UserService {
     }
 
     @Transactional
-    public APIResponseDto<UserResponse> purchasePackage(String packageId) {
+    public APIResponseDto<UserPackageResponse> purchasePackage(String packageId) {
+        return new APIResponseDto<>(HttpStatus.OK.value(), ConverterUtils.convert(purchaseRentPackage(packageId).orElseThrow(() ->  new MagicException.NotFoundException("Package not found"))));
+    }
+
+    @Transactional
+    public Optional<UserPackage> purchaseRentPackage(String packageId) {
 
         User user = getById(TokenUtils.getCurrentUserId())
                 .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
@@ -182,13 +202,9 @@ public class UserService {
                 .build();
 
         user.getUserPackages().add(userPackage);
-
-        // Single DB write (transactional)
-        User savedUser = repository.save(user);
-
-        return new APIResponseDto<>(HttpStatus.OK.value(), ConverterUtils.convert(savedUser));
+        repository.save(user);
+        return Optional.of(userPackage);
     }
-
 
     public void deductCoins(int chargeCoins) {
         User user = getById(TokenUtils.getCurrentUserId())

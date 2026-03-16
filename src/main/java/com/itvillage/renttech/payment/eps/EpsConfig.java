@@ -1,4 +1,4 @@
-package com.itvillage.renttech.payment;
+package com.itvillage.renttech.payment.eps;
 
 import lombok.Data;
 import org.springframework.boot.context.properties.ConfigurationProperties;
@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConfigurationProperties(prefix = "payment-gateway.eps")
 public class EpsConfig {
+    private String myHostUrl;
     private String hostUrl;
     private String merchantId;
     private String storeId;

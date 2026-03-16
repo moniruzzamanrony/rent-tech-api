@@ -51,7 +51,7 @@ public class UserController {
   }
 
   @PutMapping("/purchase-package/{packageId}")
-  public APIResponseDto<UserResponse> purchasePackage(@PathVariable String packageId) {
+  public APIResponseDto<UserPackageResponse> purchasePackage(@PathVariable String packageId) {
     return userService.purchasePackage(packageId);
   }
 }

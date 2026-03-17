@@ -1,10 +1,12 @@
 package com.itvillage.renttech.payment;
 
 import com.itvillage.renttech.base.constants.ApiConstant;
+import com.itvillage.renttech.base.dto.APIResponseDto;
 import com.itvillage.renttech.payment.eps.EpsPaymentResponse;
 import com.itvillage.renttech.payment.eps.EpsPaymentService;
 import com.itvillage.renttech.payment.eps.EpsTokenResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -14,16 +16,16 @@ public class PaymentController {
     private final EpsPaymentService epsPaymentService;
 
     @GetMapping(ApiConstant.PRIVATE_BASE_API+"/payments/token")
-    public EpsTokenResponse getToken() {
-        return epsPaymentService.getToken();
+    public APIResponseDto<EpsTokenResponse> getToken() {
+        return new APIResponseDto<>(HttpStatus.OK.value(), epsPaymentService.getToken());
     }
 
     /**
      * Create payment session
      */
     @PostMapping(ApiConstant.PRIVATE_BASE_API+"/payments/create")
-    public EpsPaymentResponse createPayment(@RequestBody PaymentRequest request) {
-        return epsPaymentService.createPayment(request);
+    public APIResponseDto<EpsPaymentResponse> createPayment(@RequestBody PaymentRequest request) {
+        return new APIResponseDto<>(HttpStatus.OK.value(), epsPaymentService.createPayment(request));
     }
 
     @GetMapping(ApiConstant.PUBLIC_BASE_API+"/payments/success")
@@ -87,7 +89,7 @@ public class PaymentController {
      * Check payment status
      */
     @GetMapping(ApiConstant.PRIVATE_BASE_API+"/payments/status/{orderId}")
-    public PaymentResponse getPaymentStatus(@PathVariable String orderId) {
-        return epsPaymentService.getPaymentStatus(orderId);
+    public APIResponseDto<PaymentResponse> getPaymentStatus(@PathVariable String orderId) {
+        return new APIResponseDto<>(HttpStatus.OK.value(), epsPaymentService.getPaymentStatus(orderId));
     }
 }

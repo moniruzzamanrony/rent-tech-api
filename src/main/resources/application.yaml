@@ -90,7 +90,7 @@ do:
 
 payment-gateway:
   eps:
-    my-host-url: https://localhost:6002
+    my-host-url: https://192.168.0.109:6002
     host-url: https://sandboxpgapi.eps.com.bd/v1
     merchant-id: 29e86e70-0ac6-45eb-ba04-9fcb0aaed12a
     store-id: d44e705f-9e3a-41de-98b1-1674631637da

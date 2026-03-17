@@ -1,5 +1,6 @@
 package com.itvillage.renttech.payment;
 
+import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.payment.eps.EpsPaymentResponse;
 import com.itvillage.renttech.payment.eps.EpsPaymentService;
 import com.itvillage.renttech.payment.eps.EpsTokenResponse;
@@ -7,13 +8,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/payments")
 @RequiredArgsConstructor
 public class PaymentController {
 
     private final EpsPaymentService epsPaymentService;
 
-    @GetMapping("/token")
+    @GetMapping(ApiConstant.PRIVATE_BASE_API+"/payments/token")
     public EpsTokenResponse getToken() {
         return epsPaymentService.getToken();
     }
@@ -21,48 +21,72 @@ public class PaymentController {
     /**
      * Create payment session
      */
-    @PostMapping("/create")
+    @PostMapping(ApiConstant.PRIVATE_BASE_API+"/payments/create")
     public EpsPaymentResponse createPayment(@RequestBody PaymentRequest request) {
         return epsPaymentService.createPayment(request);
     }
 
-    /**
-     * EPS payment success redirect/callback
-     */
-    @GetMapping("/success")
+    @GetMapping(ApiConstant.PUBLIC_BASE_API+"/payments/success")
     public String paymentSuccess(
-            @RequestParam String data
+            @RequestParam("Status") String status,
+            @RequestParam("MerchantTransactionId") String merchantTransactionId,
+            @RequestParam(value = "EPSTransactionId ", required = false) String epsTransactionId,
+            @RequestParam(value = "ErrorCode", required = false) String errorCode
     ) {
-        epsPaymentService.updatePaymentStatus(data);
-        return "Payment SUCCESS for order";
+
+        epsPaymentService.updatePaymentStatus(
+                PaymentStatus.SUCCESS,
+                merchantTransactionId,
+                epsTransactionId,
+                status,
+                errorCode
+        );
+
+        return "Payment SUCCESS for order: " + merchantTransactionId;
     }
 
-    /**
-     * EPS payment failure redirect/callback
-     */
-    @GetMapping("/fail")
+    @GetMapping(ApiConstant.PUBLIC_BASE_API+"/payments/fail")
     public String paymentFailed(
-            @RequestParam String data
+            @RequestParam("Status") String status,
+            @RequestParam("MerchantTransactionId") String merchantTransactionId,
+            @RequestParam(value = "EPSTransactionId", required = false) String epsTransactionId,
+            @RequestParam(value = "ErrorCode", required = false) String errorCode
     ) {
-        epsPaymentService.updatePaymentStatus(data);
-        return "Payment FAILED for order " ;
+
+        epsPaymentService.updatePaymentStatus(
+                PaymentStatus.FAILED,
+                merchantTransactionId,
+                epsTransactionId,
+                status,
+                errorCode
+        );
+
+        return "Payment FAILED for order: " + merchantTransactionId;
     }
 
-    /**
-     * EPS payment cancel redirect/callback
-     */
-    @GetMapping("/cancel")
+    @GetMapping(ApiConstant.PUBLIC_BASE_API+"/payments/cancel")
     public String paymentCancelled(
-            @RequestParam String data
+            @RequestParam("Status") String status,
+            @RequestParam("MerchantTransactionId") String merchantTransactionId,
+            @RequestParam(value = "EPSTransactionId", required = false) String epsTransactionId,
+            @RequestParam(value = "ErrorCode", required = false) String errorCode
     ) {
-        epsPaymentService.updatePaymentStatus(data);
-        return "Payment CANCELLED for order";
+
+        epsPaymentService.updatePaymentStatus(
+                PaymentStatus.CANCELLED,
+                merchantTransactionId,
+                epsTransactionId,
+                status,
+                errorCode
+        );
+
+        return "Payment CANCELLED for order: " + merchantTransactionId;
     }
 
     /**
      * Check payment status
      */
-    @GetMapping("/status/{orderId}")
+    @GetMapping(ApiConstant.PRIVATE_BASE_API+"/payments/status/{orderId}")
     public PaymentResponse getPaymentStatus(@PathVariable String orderId) {
         return epsPaymentService.getPaymentStatus(orderId);
     }

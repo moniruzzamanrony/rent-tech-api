@@ -1,20 +1,21 @@
 package com.itvillage.renttech.payment.eps;
 
 
+import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.expection.MagicException;
 import com.itvillage.renttech.payment.*;
 import com.itvillage.renttech.rentpackages.RentPackageService;
 import com.itvillage.renttech.verification.user.UserService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestTemplate;
+
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -52,14 +53,15 @@ public class EpsPaymentService {
         epsCreatePaymentRequest.setCustomerCountry(request.getBillingAddressDto().getCustomerCountry());
 
         epsCreatePaymentRequest.setProductName(request.getCoinQty() + " coins");
-        epsCreatePaymentRequest.setCancelUrl(epsConfig.getMyHostUrl() + "/api/payments/cancel");
-        epsCreatePaymentRequest.setFailUrl(epsConfig.getMyHostUrl() + "/api/payments/fail");
-        epsCreatePaymentRequest.setSuccessUrl(epsConfig.getMyHostUrl() + "/api/payments/success");
+        epsCreatePaymentRequest.setCancelUrl(epsConfig.getMyHostUrl() + ApiConstant.PUBLIC_BASE_API+"/payments/cancel");
+        epsCreatePaymentRequest.setFailUrl(epsConfig.getMyHostUrl() + ApiConstant.PUBLIC_BASE_API+"/payments/fail");
+        epsCreatePaymentRequest.setSuccessUrl(epsConfig.getMyHostUrl() + ApiConstant.PUBLIC_BASE_API+"/payments/success");
         epsCreatePaymentRequest.setValueA(String.valueOf(request.getCoinQty()));
 
         // 2️⃣ Save INIT payment in DB
         Payment payment = new Payment();
         payment.setOrderId(epsCreatePaymentRequest.getCustomerOrderId());
+        payment.setMerchantTransactionId(merchantTransactionId);
         payment.setAmount(epsCreatePaymentRequest.getTotalAmount());
         payment.setStatus(PaymentStatus.INIT);
         paymentRepository.save(payment);
@@ -73,19 +75,28 @@ public class EpsPaymentService {
             }
 
             HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            headers.setAccept(List.of(MediaType.APPLICATION_JSON));
             headers.add("x-hash", hash);
-            headers.add("Authorization", epsTokenResponse.getToken());
+            headers.add("Authorization", "Bearer " + epsTokenResponse.getToken());
             HttpEntity<EpsCreatePaymentRequest> entity = new HttpEntity<>(epsCreatePaymentRequest, headers);
 
             String initUrl = epsConfig.getHostUrl() + "/EPSEngine/InitializeEPS";
-            var responseEntity = restTemplate.exchange(
+            ResponseEntity<EpsPaymentResponse> responseEntity = restTemplate.exchange(
                     initUrl,
                     HttpMethod.POST,
                     entity,
                     EpsPaymentResponse.class
             );
-
+            HttpStatusCode statusCode = responseEntity.getStatusCode();
+            HttpHeaders responseHeaders = responseEntity.getHeaders();
             EpsPaymentResponse epsResponse = responseEntity.getBody();
+            // ✅ Save full response for debugging (VERY IMPORTANT)
+            payment.setGatewayResponse(
+                    "STATUS: " + statusCode +
+                            " | HEADERS: " + responseHeaders.toString() +
+                            " | BODY: " + (epsResponse != null ? epsResponse.toString() : "NULL")
+            );
 
             if (epsResponse == null) {
                 throw new RuntimeException("EPS API returned null response");
@@ -93,19 +104,10 @@ public class EpsPaymentService {
 
             // 4️⃣ Update DB with transaction info if available
             if (epsResponse.getTransactionId() != null) {
-                payment.setTransactionId(epsResponse.getTransactionId());
                 payment.setPaymentUrl(epsResponse.getRedirectUrl());
                 payment.setCoinQty(request.getCoinQty());
-
-                try {
-                    userService.addCoins(request.getCoinQty());
-                } catch (Exception e) {
-                    System.err.println("Failed to add coins to user: " + e.getMessage());
-                }
-
-                paymentRepository.save(payment);
             }
-
+            paymentRepository.save(payment);
             return epsResponse;
 
         } catch (HttpClientErrorException e) {
@@ -129,19 +131,66 @@ public class EpsPaymentService {
     /**
      * Update payment status based on redirect query params
      */
-    public void updatePaymentStatus(String data) {
-        System.out.println(data);
-//        Optional<Payment> optionalPayment = paymentRepository.findByTransactionId(transactionId);
-//        if (optionalPayment.isPresent()) {
-//            Payment payment = optionalPayment.get();
-//            switch (status.toUpperCase()) {
-//                case "SUCCESS" -> payment.setStatus(PaymentStatus.SUCCESS);
-//                case "FAILED" -> payment.setStatus(PaymentStatus.FAILED);
-//                case "CANCELLED" -> payment.setStatus(PaymentStatus.CANCELLED);
-//                default -> payment.setStatus(PaymentStatus.FAILED);
-//            }
-//            paymentRepository.save(payment);
-//        }
+    public void updatePaymentStatus(
+            PaymentStatus status,
+            String merchantTransactionId,
+            String epsTransactionId,
+            String epsStatus,
+            String errorCode
+    ) {
+
+        System.out.println("PaymentStatus Enum: " + status);
+        System.out.println("EPS Status: " + epsStatus);
+        System.out.println("MerchantTxnId: " + merchantTransactionId);
+        System.out.println("EPSTxnId: " + epsTransactionId);
+        System.out.println("ErrorCode: " + errorCode);
+
+        Optional<Payment> optionalPayment =
+                paymentRepository.findByMerchantTransactionId(merchantTransactionId);
+
+        if (optionalPayment.isEmpty()) {
+            System.err.println("Payment not found for MerchantTransactionId: " + merchantTransactionId);
+            return;
+        }
+
+        Payment payment = optionalPayment.get();
+
+        // ✅ Prevent duplicate update (VERY IMPORTANT)
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+            System.out.println("Payment already SUCCESS. Skipping update.");
+            return;
+        }
+
+        // ✅ Update status based on EPS response (more reliable than URL path)
+        if ("Success".equalsIgnoreCase(epsStatus)) {
+            payment.setStatus(PaymentStatus.SUCCESS);
+
+            // Save EPS transaction ID
+            if (epsTransactionId != null && !epsTransactionId.isBlank()) {
+                payment.setTransactionId(epsTransactionId.trim());
+
+                try {
+                    userService.addCoins(payment.getCoinQty());
+                } catch (Exception e) {
+                    System.err.println("Failed to add coins to user: " + e.getMessage());
+                }
+            }
+
+        } else if ("Failed".equalsIgnoreCase(epsStatus)) {
+            payment.setStatus(PaymentStatus.FAILED);
+
+        } else if ("Cancelled".equalsIgnoreCase(epsStatus)) {
+            payment.setStatus(PaymentStatus.CANCELLED);
+
+        } else {
+            payment.setStatus(PaymentStatus.FAILED);
+        }
+
+        payment.setErrorCode(errorCode);
+
+        paymentRepository.save(payment);
+
+        System.out.println("Payment updated successfully: " + merchantTransactionId);
     }
 
     /**

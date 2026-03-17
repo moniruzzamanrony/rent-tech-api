@@ -16,8 +16,12 @@ public class Payment extends MagicBaseModel {
     // Transaction ID from EPS
     private String transactionId;
 
+    private String merchantTransactionId;
+
     // Redirect URL returned by EPS
     private String paymentUrl;
+
+    private String errorCode;
 
     // Amount in BDT
     private double amount;
@@ -31,6 +35,5 @@ public class Payment extends MagicBaseModel {
     // Raw JSON response from EPS
     @Lob
     private String gatewayResponse;
-
 
 }

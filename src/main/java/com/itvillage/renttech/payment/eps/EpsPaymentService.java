@@ -3,6 +3,7 @@ package com.itvillage.renttech.payment.eps;
 
 import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.expection.MagicException;
+import com.itvillage.renttech.base.utils.TokenUtils;
 import com.itvillage.renttech.payment.*;
 import com.itvillage.renttech.rentpackages.RentPackageService;
 import com.itvillage.renttech.verification.user.UserService;
@@ -60,6 +61,7 @@ public class EpsPaymentService {
 
         // 2️⃣ Save INIT payment in DB
         Payment payment = new Payment();
+        payment.setUserId(TokenUtils.getCurrentUserId());
         payment.setOrderId(epsCreatePaymentRequest.getCustomerOrderId());
         payment.setMerchantTransactionId(merchantTransactionId);
         payment.setAmount(epsCreatePaymentRequest.getTotalAmount());
@@ -170,7 +172,7 @@ public class EpsPaymentService {
                 payment.setTransactionId(epsTransactionId.trim());
 
                 try {
-                    userService.addCoins(payment.getCoinQty());
+                    userService.addCoins(payment.getUserId(),payment.getCoinQty());
                 } catch (Exception e) {
                     System.err.println("Failed to add coins to user: " + e.getMessage());
                 }

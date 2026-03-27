@@ -5,6 +5,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.dto.APIResponseDto;
+import com.itvillage.renttech.base.utils.TokenUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -47,7 +48,7 @@ public class UserController {
 
   @PutMapping("/add-credit/{amount}")
   public APIResponseDto<UserResponse> addCredit(@PathVariable int amount) {
-    return userService.addCredit(amount);
+    return userService.addCredit(TokenUtils.getCurrentUserId(),amount);
   }
 
   @PutMapping("/purchase-package/{packageId}")

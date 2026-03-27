@@ -139,15 +139,15 @@ public class UserService {
         return user;
     }
 
-    public APIResponseDto<UserResponse> addCredit(int amount) {
-        User user = addCoins(amount);
+    public APIResponseDto<UserResponse> addCredit(String userId, int amount) {
+        User user = addCoins(userId,amount);
 
         return new APIResponseDto<>(HttpStatus.OK.value(), ConverterUtils.convert(user));
     }
 
-    public User addCoins(int amount) {
+    public User addCoins(String userId, int amount) {
         try {
-            User user = getById(TokenUtils.getCurrentUserId())
+            User user = getById(userId)
                     .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
 
             user.setCurrentCoins(user.getCurrentCoins() + amount);

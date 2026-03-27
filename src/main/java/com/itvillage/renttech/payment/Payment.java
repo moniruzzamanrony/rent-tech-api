@@ -10,7 +10,8 @@ import lombok.Data;
 @Data
 public class Payment extends MagicBaseModel {
 
-    // Order ID / Merchant Order ID
+    private String userId;
+
     private String orderId;
 
     // Transaction ID from EPS

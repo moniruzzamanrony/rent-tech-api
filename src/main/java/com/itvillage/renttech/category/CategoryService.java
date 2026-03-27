@@ -1,5 +1,6 @@
 package com.itvillage.renttech.category;
 
+import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.service.MagicService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
@@ -50,7 +51,7 @@ public class CategoryService extends MagicService<Category, String> {
 
         // PRICE QUESTION
         DynamicFormQuestionRequest priceDQ = new DynamicFormQuestionRequest();
-        priceDQ.setId("SYS_PRICE_QS_" + categoryId.substring(4));
+        priceDQ.setId(ApiConstant.SYS_PRICE_QS_ + categoryId.substring(4));
         priceDQ.setCategoryId(categoryId);
         priceDQ.setQuestionType(QuestionType.INPUT);
         priceDQ.setLabel("Price");
@@ -64,7 +65,7 @@ public class CategoryService extends MagicService<Category, String> {
 
         // LOCATION QUESTION
         DynamicFormQuestionRequest locationDQ = new DynamicFormQuestionRequest();
-        locationDQ.setId("SYS_LOCATION_QS_" + categoryId.substring(4));
+        locationDQ.setId(ApiConstant.SYS_LOCATION_QS_ + categoryId.substring(4));
         locationDQ.setCategoryId(categoryId);
         locationDQ.setQuestionType(QuestionType.INPUT);
         locationDQ.setLabel("Location");
@@ -77,7 +78,7 @@ public class CategoryService extends MagicService<Category, String> {
 
         // POST TITLE QUESTION
         DynamicFormQuestionRequest postTitle = new DynamicFormQuestionRequest();
-        postTitle.setId("SYS_TITLE_QS_" + categoryId.substring(4));
+        postTitle.setId(ApiConstant.SYS_TITLE_QS_ + categoryId.substring(4));
         postTitle.setCategoryId(categoryId);
         postTitle.setQuestionType(QuestionType.INPUT);
         postTitle.setLabel("Post Title");
@@ -90,7 +91,7 @@ public class CategoryService extends MagicService<Category, String> {
 
         // POST TITLE QUESTION
         DynamicFormQuestionRequest addressQs = new DynamicFormQuestionRequest();
-        addressQs.setId("SYS_ADDRESS_QS_" + categoryId.substring(4));
+        addressQs.setId(ApiConstant.SYS_ADDRESS_QS_ + categoryId.substring(4));
         addressQs.setCategoryId(categoryId);
         addressQs.setQuestionType(QuestionType.INPUT);
         addressQs.setLabel("Address");
@@ -103,7 +104,7 @@ public class CategoryService extends MagicService<Category, String> {
 
         // POST TITLE QUESTION
         DynamicFormQuestionRequest availableFromQs = new DynamicFormQuestionRequest();
-        availableFromQs.setId("SYS_AVAILABLE_FROM_QS_" + categoryId.substring(4));
+        availableFromQs.setId(ApiConstant.SYS_AVAILABLE_FROM_QS_ + categoryId.substring(4));
         availableFromQs.setCategoryId(categoryId);
         availableFromQs.setQuestionType(QuestionType.INPUT);
         availableFromQs.setLabel("Available From");

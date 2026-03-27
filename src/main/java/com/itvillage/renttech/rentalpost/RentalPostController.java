@@ -60,9 +60,9 @@ public class RentalPostController {
     }
 
     @GetMapping("/my-post")
-    public APIResponseDto<Page<RentalPostResponse>> getMyRentalPost(
+    public APIResponseDto<Page<RentalPostListResponse>> getMyRentalPost(
             @PageableDefault(size = 10) Pageable pageable) {
-        Page<RentalPostResponse> responses = rentalPostService.getMyRentalPost(pageable);
+        Page<RentalPostListResponse> responses = rentalPostService.getMyRentalPost(pageable);
         return new APIResponseDto<>(HttpStatus.OK.value(), responses);
     }
 

@@ -1,6 +1,7 @@
 package com.itvillage.renttech.base.utils;
 
 
+import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.category.Category;
 import com.itvillage.renttech.category.CategoryResponse;
 import com.itvillage.renttech.dynamicform.*;
@@ -8,6 +9,7 @@ import com.itvillage.renttech.notification.Notification;
 import com.itvillage.renttech.notification.NotificationRequestDto;
 import com.itvillage.renttech.notification.NotificationResponseDto;
 import com.itvillage.renttech.rentalpost.RentalPost;
+import com.itvillage.renttech.rentalpost.RentalPostListResponse;
 import com.itvillage.renttech.rentalpost.RentalPostResponse;
 import com.itvillage.renttech.verification.user.User;
 import com.itvillage.renttech.verification.user.UserPackage;
@@ -75,6 +77,25 @@ public class ConverterUtils {
             rentalPostResponse.setRentalPostFiles(rentalPost.getRentalPostFiles());
         if (includes.contains("interestedPeople"))
             rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(ConverterUtils::convert).collect(Collectors.toSet()));
+        return rentalPostResponse;
+    }
+    public static RentalPostListResponse convertToRentalPostListResponse(RentalPost rentalPost) {
+        RentalPostListResponse rentalPostResponse = new RentalPostListResponse();
+        rentalPostResponse.setId(rentalPost.getId());
+        rentalPostResponse.setTitle(
+                rentalPost.getFormQuestionsAnswer().stream()
+                        .filter(ans -> ans.getDynamicFormQuestion().getId().startsWith(ApiConstant.SYS_TITLE_QS_))
+                        .findFirst()
+                        .map(ans -> ans.getAnswers() != null && !ans.getAnswers().isEmpty()
+                                ? ans.getAnswers().get(0).getAnswer().trim()
+                                : null)
+                        .orElse("N/A")
+        );
+
+        rentalPostResponse.setCategoryName(rentalPost.getCategory().getName());
+        rentalPostResponse.setCategoryIconUrl(rentalPost.getCategory().getIconUrl());
+        rentalPostResponse.setInterestedPeopleCount(rentalPost.getInterestedPeople().size());
+
         return rentalPostResponse;
     }
 

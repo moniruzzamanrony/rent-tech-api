@@ -191,10 +191,10 @@ public class RentalPostService {
     }
 
     @Transactional()
-    public Page<RentalPostResponse> getMyRentalPost(Pageable pageable) {
+    public Page<RentalPostListResponse> getMyRentalPost(Pageable pageable) {
         return rentalPostRepository
                 .findByOwner_IdOrderByModifiedDateDesc(TokenUtils.getCurrentUserId(), pageable)
-                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category","formQuestionsAnswer")));
+                .map(rentalPost -> ConverterUtils.convertToRentalPostListResponse(rentalPost));
     }
 
     public RentalPostResponse getPostDetails(String rentalId) {

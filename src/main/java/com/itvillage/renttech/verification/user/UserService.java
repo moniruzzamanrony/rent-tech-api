@@ -210,7 +210,7 @@ public class UserService {
         User user = getById(TokenUtils.getCurrentUserId())
                 .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
 
-        if (user.getCurrentCoins() < chargeCoins) {
+        if (user.getCurrentCoins() <= chargeCoins) {
             throw new MagicException.BadRequestException("Insufficient coins");
         }
         user.setCurrentCoins(user.getCurrentCoins() - chargeCoins);

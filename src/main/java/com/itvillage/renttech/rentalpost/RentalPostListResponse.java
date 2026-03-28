@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class RentalPostListResponse extends BaseDto {
+    private String mobileNo;
     private String categoryName;
     private String categoryIconUrl;
     private String title;

@@ -211,10 +211,14 @@ public class RentalPostService {
                 .collect(Collectors.toList());
     }
 
-    public List<RentalPostResponse> getMyInterestedRentalPost() {
-        return rentalPostRepository.findAllByInterestedUserId(TokenUtils.getCurrentUserId()).stream()
-                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("category")))
-                .collect(Collectors.toList());
+    public Page<RentalPostListResponse> getMyInterestedRentalPost(Pageable pageable) {
+        Page<RentalPost> interestedRentalPosts =
+                rentalPostRepository.findAllByInterestedUserId(
+                        TokenUtils.getCurrentUserId(),
+                        pageable
+                );
+
+        return interestedRentalPosts.map(ConverterUtils::convertToRentalPostListResponse);
     }
 
     @Transactional

@@ -78,8 +78,12 @@ public class RentalPostController {
     }
 
     @GetMapping("/my-interested-post")
-    public APIResponseDto<List<RentalPostResponse>> getMyInterestedRentalPost() {
-        List<RentalPostResponse> responses = rentalPostService.getMyInterestedRentalPost();
+    public APIResponseDto<Page<RentalPostListResponse>> getMyInterestedRentalPost(
+            @PageableDefault(size = 10) Pageable pageable) {
+
+        Page<RentalPostListResponse> responses =
+                rentalPostService.getMyInterestedRentalPost(pageable);
+
         return new APIResponseDto<>(HttpStatus.OK.value(), responses);
     }
 

@@ -20,12 +20,12 @@ public interface RentalPostRepository extends JpaRepository<RentalPost, String> 
     List<RentalPost> findAllByCategoryId(@Param("categoryId") String categoryId);
 
     @Query("""
-           SELECT r 
-           FROM RentalPost r
-           JOIN r.interestedPeople u
-           WHERE u.id = :userId
-           """)
-    List<RentalPost> findAllByInterestedUserId(@Param("userId") String userId);
+       SELECT DISTINCT r
+       FROM RentalPost r
+       JOIN r.interestedPeople u
+       WHERE u.id = :userId
+       """)
+    Page<RentalPost> findAllByInterestedUserId(@Param("userId") String userId, Pageable pageable);
 
     List<RentalPost> findAllByValidTrueAndExpiryDateBefore(ZonedDateTime now);
 }

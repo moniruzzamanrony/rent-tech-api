@@ -95,6 +95,7 @@ public class ConverterUtils {
         rentalPostResponse.setCategoryName(rentalPost.getCategory().getName());
         rentalPostResponse.setCategoryIconUrl(rentalPost.getCategory().getIconUrl());
         rentalPostResponse.setInterestedPeopleCount(rentalPost.getInterestedPeople().size());
+        rentalPostResponse.setMobileNo(rentalPost.getOwner().getMobileNo());
 
         return rentalPostResponse;
     }

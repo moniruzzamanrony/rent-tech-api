@@ -11,7 +11,8 @@ public enum Profession {
     PRIVATE_SERVICE_HOLDER(100),
     GOVT_SERVICE_HOLDER(101),
     BUSINESS(103),
-    STUDENT(104);
+    STUDENT(104),
+    NONE(105);
 
     private final int code;
 

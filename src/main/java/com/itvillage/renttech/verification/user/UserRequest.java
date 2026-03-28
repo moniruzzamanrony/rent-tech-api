@@ -12,8 +12,6 @@ import lombok.NoArgsConstructor;
 public class UserRequest {
   private String name;
 
-  private String mobileNo;
-
   private Gender gender;
 
   private String nidNumber;

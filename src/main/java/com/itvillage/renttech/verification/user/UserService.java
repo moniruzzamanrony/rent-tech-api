@@ -55,10 +55,6 @@ public class UserService {
             UserRequest request,
             MultipartFile file
     ) {
-        if (!isValidBDPhone(request.getMobileNo())) {
-            throw new MagicException.BadRequestException("Invalid phone number");
-        }
-
         User user = repository.findById(TokenUtils.getCurrentUserId())
                 .orElseThrow(() -> new MagicException.BadRequestException("User not found"));
 

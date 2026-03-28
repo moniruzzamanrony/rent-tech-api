@@ -11,6 +11,7 @@ import com.itvillage.renttech.dynamicform.DynamicFormQuestion;
 import com.itvillage.renttech.dynamicform.DynamicFormService;
 import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestion;
 import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestionRequest;
+import com.itvillage.renttech.notification.NotificationRequestDto;
 import com.itvillage.renttech.notification.NotificationService;
 import com.itvillage.renttech.rentpackages.PackageType;
 import com.itvillage.renttech.rentpackages.RentPackage;
@@ -278,6 +279,13 @@ public class RentalPostService {
 
         // Delete associated files from S3
         rentalPost.getRentalPostFiles().forEach(file -> spaceService.deleteFile(file.getUrl()));
+
+        // Send Notifications to Interested people
+        NotificationRequestDto notificationRequestDto = new NotificationRequestDto();
+        notificationRequestDto.setTitle("Interested Rental Post Removed By Owner");
+        notificationRequestDto.setDetails("Rental Post Id: " + rentalPost.getId());
+        notificationRequestDto.setReceiverIds(rentalPost.getInterestedPeople().stream().map(User::getId).toList());
+        notificationService.save(notificationRequestDto);
 
         rentalPostRepository.delete(rentalPost);
     }

@@ -52,7 +52,7 @@ public class RentalPostController {
         return new APIResponseDto<>(HttpStatus.OK.value(), response);
     }
 
-    @DeleteMapping(path = "/{rentalId}/files/{fileName}/delete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @DeleteMapping(path = "/{rentalId}/files/{fileName}/delete")
     public APIResponseDto<RentalPostResponse> deleteFile(
             @PathVariable("rentalId") String rentalId, @PathVariable String fileName) {
         RentalPostResponse response = rentalPostService.deleteFile(rentalId, fileName);

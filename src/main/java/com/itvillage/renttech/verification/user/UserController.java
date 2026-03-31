@@ -55,4 +55,8 @@ public class UserController {
   public APIResponseDto<UserPackageResponse> purchasePackage(@PathVariable String packageId) {
     return userService.purchasePackage(packageId);
   }
+  @GetMapping("/has-purchase-package/verify")
+  public APIResponseDto<Boolean> hasPurchasePackage() {
+    return userService.hasPurchasePackage();
+  }
 }

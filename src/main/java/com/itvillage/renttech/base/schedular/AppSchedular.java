@@ -13,7 +13,7 @@ public class AppSchedular {
     private RentalPostService rentalPostService;
     private UserService userService;
 
-    @Scheduled(fixedDelay = 60000)
+    @Scheduled(fixedDelay = 360000)
     public void run(){
         rentalPostService.makeInvalidExpiredPost();
         userService.makeInvalidExpiredPackages();

@@ -72,8 +72,8 @@ public class RentalPostController {
     }
 
     @GetMapping("/categories/{categoryId}/location")
-    public APIResponseDto<List<RentalPostResponse>> getPostLocationByCategory(@PathVariable String categoryId) {
-        List<RentalPostResponse> responses = rentalPostService.getPostLocationByCategory(categoryId);
+    public APIResponseDto<List<RentalMapMarkerProjection>> getPostLocationByCategory(@PathVariable String categoryId) {
+        List<RentalMapMarkerProjection> responses = rentalPostService.getPostLocationByCategory(categoryId);
         return new APIResponseDto<>(HttpStatus.OK.value(), responses);
     }
 

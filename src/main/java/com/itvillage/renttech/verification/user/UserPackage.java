@@ -1,6 +1,5 @@
 package com.itvillage.renttech.verification.user;
 
-
 import com.itvillage.renttech.base.model.MagicBaseModel;
 import com.itvillage.renttech.rentpackages.RentPackage;
 import jakarta.persistence.*;
@@ -8,6 +7,7 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
+
 @Entity
 @Table(
         name = "user_package",
@@ -27,10 +27,9 @@ public class UserPackage extends MagicBaseModel implements Serializable {
   @JoinColumn(name = "rent_package_id", nullable = false)
   private RentPackage rentPackage;
 
-  @Column(nullable = false)
+  @Column(name = "valid", nullable = false)
   private boolean valid = true;
 
   @Column(name = "expiry_date", nullable = false)
   private ZonedDateTime expiryDate;
 }
-

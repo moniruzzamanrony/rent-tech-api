@@ -1,7 +1,5 @@
 package com.itvillage.renttech.notification;
 
-
-
 import com.itvillage.renttech.base.model.MagicBaseModel;
 import com.itvillage.renttech.verification.user.User;
 import jakarta.persistence.*;
@@ -30,13 +28,12 @@ public class Notification extends MagicBaseModel {
     @JoinColumn(name = "sender_id")
     private User sender;
 
-    @Column(nullable = false, length = 150)
+    @Column(name = "title", nullable = false, length = 150)
     private String title;
 
-    @Column(length = 1000)
+    @Column(name = "details", length = 1000)
     private String details;
 
-    @Column(nullable = false)
+    @Column(name = "seen", nullable = false)
     private boolean seen = false;
 }
-

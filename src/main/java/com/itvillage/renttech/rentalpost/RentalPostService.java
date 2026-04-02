@@ -204,11 +204,9 @@ public class RentalPostService {
         return ConverterUtils.convert(rentalPost,List.of("category","owner","formQuestionsAnswer","rentalPostFiles","interestedPeople"));
     }
 
-    public List<RentalPostResponse> getPostLocationByCategory(String categoryId) {
-        List<RentalPost> rentalPosts = rentalPostRepository.findAllByCategoryId(categoryId);
-        return rentalPosts.stream()
-                .map(rentalPost -> ConverterUtils.convert(rentalPost, List.of("formQuestionsAnswer")))
-                .collect(Collectors.toList());
+    public List<RentalMapMarkerProjection> getPostLocationByCategory(String categoryId) {
+        List<RentalMapMarkerProjection> rentalPosts = rentalPostRepository.findAllByCategoryId(categoryId);
+        return rentalPosts;
     }
 
     public Page<RentalPostListResponse> getMyInterestedRentalPost(Pageable pageable) {

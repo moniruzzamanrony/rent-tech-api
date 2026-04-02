@@ -22,8 +22,15 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "rental_post")
+@Table(name = "rental_post",
+        indexes = {
+                @Index(name = "idx_rental_post_category", columnList = "category_id"),
+                @Index(name = "idx_rental_post_category_id", columnList = "category_id, id")
+        })
 public class RentalPost extends MagicBaseModel implements Serializable {
+
+    @Column(name = "name", nullable = false)
+    private String name;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -33,12 +40,12 @@ public class RentalPost extends MagicBaseModel implements Serializable {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
-    //Todo: will be remove
-    @Column(nullable = false)
+    // Todo: will be removed
+    @Column(name = "latitude", nullable = false)
     private double latitude;
 
-    //Todo: will be remove
-    @Column(nullable = false)
+    // Todo: will be removed
+    @Column(name = "longitude", nullable = false)
     private double longitude;
 
     @OneToMany(fetch = FetchType.LAZY,
@@ -61,6 +68,9 @@ public class RentalPost extends MagicBaseModel implements Serializable {
     )
     private Set<User> interestedPeople = new HashSet<>();
 
+    @Column(name = "valid")
     private boolean valid;
+
+    @Column(name = "expiry_date")
     private ZonedDateTime expiryDate;
 }

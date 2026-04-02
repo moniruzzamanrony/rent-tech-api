@@ -10,7 +10,10 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "user_answer_values")
+@Table(name = "user_answer_values",
+        indexes = {
+                @Index(name = "idx_uav_question", columnList = "user_answer_question_id")
+        })
 public class UserAnswerValue extends MagicBaseModel { // Inheriting ID from your base model
 
     @Column(name = "answer", nullable = false, columnDefinition = "TEXT")

@@ -16,8 +16,25 @@ public interface RentalPostRepository extends JpaRepository<RentalPost, String> 
     @EntityGraph(attributePaths = {"category", "owner"})
     Page<RentalPost> findByOwner_IdOrderByModifiedDateDesc(String ownerId, Pageable pageable);
 
-    @Query("SELECT r FROM RentalPost r JOIN FETCH r.category c WHERE c.id = :categoryId")
-    List<RentalPost> findAllByCategoryId(@Param("categoryId") String categoryId);
+    @Query(value = """
+SELECT
+    r.id,
+    r.latitude,
+    r.longitude,
+    r.valid,
+    JSON_OBJECTAGG(
+        SUBSTRING_INDEX(q.dynamic_form_question_id, '_', 3),
+        v.answer
+    ) AS answers
+FROM rental_post r
+JOIN user_answer_dynamic_form_question q
+  ON q.rental_post_id = r.id
+JOIN user_answer_values v
+  ON v.user_answer_question_id = q.id
+WHERE r.category_id = :categoryId
+  AND q.dynamic_form_question_id LIKE 'SYS_%'
+GROUP BY r.id, r.latitude, r.longitude, r.valid""", nativeQuery = true)
+    List<RentalMapMarkerProjection> findAllByCategoryId(@Param("categoryId") String categoryId);
 
     @Query("""
        SELECT DISTINCT r

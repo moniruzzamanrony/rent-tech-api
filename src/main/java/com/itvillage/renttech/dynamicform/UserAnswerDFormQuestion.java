@@ -17,7 +17,12 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "user_answer_dynamic_form_question")
+@Table(name = "user_answer_dynamic_form_question",
+        indexes = {
+                @Index(name = "idx_uadfq_rental_post", columnList = "rental_post_id"),
+                @Index(name = "idx_uadfq_question", columnList = "dynamic_form_question_id"),
+                @Index(name = "idx_uadfq_post_question", columnList = "rental_post_id, dynamic_form_question_id")
+        })
 public class UserAnswerDFormQuestion extends MagicBaseModel implements Serializable {
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -30,20 +35,17 @@ public class UserAnswerDFormQuestion extends MagicBaseModel implements Serializa
 
     /**
      * Syncs the string array from the frontend/DTO with the entity collection.
-     * This is the safest way to handle updates and inserts.
      */
     public void setAnswersFromStrings(List<String> stringAnswers) {
-        // 1. Clear existing answers to avoid duplicates if updating
         this.answers.clear();
 
         if (stringAnswers == null) return;
 
-        // 2. Map each string to a new UserAnswerValue entity
         List<UserAnswerValue> newValues = stringAnswers.stream()
                 .filter(Objects::nonNull)
                 .map(text -> UserAnswerValue.builder()
                         .answer(text)
-                        .question(this) // Set the back-reference (the FK)
+                        .question(this)
                         .build())
                 .toList();
 
@@ -52,7 +54,6 @@ public class UserAnswerDFormQuestion extends MagicBaseModel implements Serializa
 
     /**
      * Converts the entity collection back to a simple List of Strings.
-     * Useful for DTO mapping or frontend responses.
      */
     public List<String> getAnswersAsStrings() {
         if (this.answers == null) {

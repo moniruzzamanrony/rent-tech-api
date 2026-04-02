@@ -16,10 +16,14 @@ import java.io.Serializable;
 @Entity
 @Table(name = "question_option")
 public class QuestionOption extends MagicBaseModel implements Serializable {
+
+    @Column(name = "name")
     private String name;
 
+    @Column(name = "value")
     private int value;
 
+    @Column(name = "icon_url")
     private String iconUrl;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

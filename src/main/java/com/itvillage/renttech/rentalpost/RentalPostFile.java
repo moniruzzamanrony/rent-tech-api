@@ -18,12 +18,13 @@ import java.io.Serializable;
 @Entity
 @Table(name = "rental_post_file")
 public class RentalPostFile extends MagicBaseModel implements Serializable {
-    @Column(nullable = false)
+
+    @Column(name = "file_name", nullable = false)
     private String fileName;
 
-    @Column(nullable = false)
+    @Column(name = "mime_type", nullable = false)
     private String mimeType;
 
-    @Column(nullable = false)
+    @Column(name = "url", nullable = false)
     private String url;
 }

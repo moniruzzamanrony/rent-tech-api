@@ -23,26 +23,36 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 public class User extends MagicBaseModel implements UserDetails, Serializable {
+  @Column(name = "name")
   private String name;
 
+  @Column(name = "mobile_no")
   private String mobileNo;
 
   @Convert(converter = Gender.GenderConverter.class)
+  @Column(name = "gender")
   private Gender gender;
 
+  @Column(name = "nid_number")
   private String nidNumber;
 
+  @Column(name = "present_address")
   private String presentAddress;
 
   @Convert(converter = Profession.ProfessionConverter.class)
+  @Column(name = "profession")
   private Profession profession;
 
+  @Column(name = "university_name")
   private String universityName;
 
+  @Column(name = "password")
   private String password;
 
+  @Column(name = "current_coins")
   private int currentCoins;
 
+  @Column(name = "profile_pic_url")
   private String profilePicUrl;
 
   @OneToMany(
@@ -50,13 +60,11 @@ public class User extends MagicBaseModel implements UserDetails, Serializable {
           cascade = CascadeType.ALL,
           orphanRemoval = true
   )
-  @JoinColumn(name = "user_id") // foreign key in user_package table
+  @JoinColumn(name = "user_id")
   private List<UserPackage> userPackages = new ArrayList<>();
 
-
-
   @Convert(converter = Role.RoleConverter.class)
-  @Column(nullable = false)
+  @Column(name = "role", nullable = false)
   private Role role;
 
   @Override

@@ -3,6 +3,7 @@ package com.itvillage.renttech.rentalpost;
 import com.itvillage.renttech.base.model.MagicBaseModel;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.*;
 
@@ -13,7 +14,10 @@ import java.io.Serializable;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "rental_post_file")
+@Table(name = "rental_post_file",
+        indexes = {
+                @Index(name = "idx_rpf_rental_post_id", columnList = "rental_post_id")
+        } )
 public class RentalPostFile extends MagicBaseModel implements Serializable {
 
     @Column(name = "file_name", nullable = false)

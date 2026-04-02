@@ -21,6 +21,7 @@ import java.util.Set;
 @Entity
 @Table(name = "rental_post",
         indexes = {
+                @Index(name = "idx_rental_post_user_id", columnList = "user_id"),
                 @Index(name = "idx_rental_post_category", columnList = "category_id"),
                 @Index(name = "idx_rental_post_category_id", columnList = "category_id, id")
         })
@@ -61,7 +62,11 @@ public class RentalPost extends MagicBaseModel implements Serializable {
     @JoinTable(
             name = "rental_post_interest",
             joinColumns = @JoinColumn(name = "rental_post_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
+            inverseJoinColumns = @JoinColumn(name = "user_id"),
+            indexes = {
+                    @Index(name = "idx_rpi_rental_post", columnList = "rental_post_id"),
+                    @Index(name = "idx_rpi_user", columnList = "user_id")
+            }
     )
     private Set<User> interestedPeople = new HashSet<>();
 

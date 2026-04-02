@@ -15,7 +15,10 @@ import java.util.Set;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "dynamic_form_question")
+@Table(name = "dynamic_form_question",
+        indexes = {
+                @Index(name = "idx_dfq_id", columnList = "id")
+        })
 public class DynamicFormQuestion extends MagicBaseModel implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "category_id") // explicit FK column

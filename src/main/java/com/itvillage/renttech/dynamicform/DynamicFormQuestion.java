@@ -17,7 +17,8 @@ import java.util.Set;
 @Entity
 @Table(name = "dynamic_form_question",
         indexes = {
-                @Index(name = "idx_dfq_id", columnList = "id")
+                @Index(name = "idx_dfq_id", columnList = "id"),
+                @Index(name = "idx_dfq_category_purpose", columnList = "category_id, purpose_type")
         })
 public class DynamicFormQuestion extends MagicBaseModel implements Serializable {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)

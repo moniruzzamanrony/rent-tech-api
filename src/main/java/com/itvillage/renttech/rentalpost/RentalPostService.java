@@ -207,8 +207,7 @@ public class RentalPostService {
     @Transactional()
     public Page<RentalPostListResponse> getMyRentalPost(Pageable pageable) {
         return rentalPostRepository
-                .findByOwner_IdOrderByModifiedDateDesc(TokenUtils.getCurrentUserId(), pageable)
-                .map(rentalPost -> ConverterUtils.convertToRentalPostListResponse(rentalPost));
+                .findRentalPostListByOwnerId(TokenUtils.getCurrentUserId(), pageable);
     }
 
     public RentalPostResponse getPostDetails(String rentalId) {
@@ -223,13 +222,11 @@ public class RentalPostService {
     }
 
     public Page<RentalPostListResponse> getMyInterestedRentalPost(Pageable pageable) {
-        Page<RentalPost> interestedRentalPosts =
+        return
                 rentalPostRepository.findAllByInterestedUserId(
                         TokenUtils.getCurrentUserId(),
                         pageable
                 );
-
-        return interestedRentalPosts.map(ConverterUtils::convertToRentalPostListResponse);
     }
 
     @Transactional

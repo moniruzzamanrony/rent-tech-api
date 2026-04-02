@@ -81,26 +81,26 @@ public class ConverterUtils {
             rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(user -> convert(user,List.of())).collect(Collectors.toSet()));
         return rentalPostResponse;
     }
-    public static RentalPostListResponse convertToRentalPostListResponse(RentalPost rentalPost) {
-        RentalPostListResponse rentalPostResponse = new RentalPostListResponse();
-        rentalPostResponse.setId(rentalPost.getId());
-        rentalPostResponse.setTitle(
-                rentalPost.getFormQuestionsAnswer().stream()
-                        .filter(ans -> ans.getDynamicFormQuestion().getId().startsWith(ApiConstant.SYS_TITLE_QS_))
-                        .findFirst()
-                        .map(ans -> ans.getAnswers() != null && !ans.getAnswers().isEmpty()
-                                ? new ArrayList<>(ans.getAnswers()).get(0).getAnswer().trim()
-                                : null)
-                        .orElse("N/A")
-        );
-
-        rentalPostResponse.setCategoryName(rentalPost.getCategory().getName());
-        rentalPostResponse.setCategoryIconUrl(rentalPost.getCategory().getIconUrl());
-        rentalPostResponse.setInterestedPeopleCount(rentalPost.getInterestedPeople().size());
-        rentalPostResponse.setMobileNo(rentalPost.getOwner().getMobileNo());
-
-        return rentalPostResponse;
-    }
+//    public static RentalPostListResponse convertToRentalPostListResponse(RentalPost rentalPost) {
+//        RentalPostListResponse rentalPostResponse = new RentalPostListResponse();
+//        rentalPostResponse.setId(rentalPost.getId());
+//        rentalPostResponse.setTitle(
+//                rentalPost.getFormQuestionsAnswer().stream()
+//                        .filter(ans -> ans.getDynamicFormQuestion().getId().startsWith(ApiConstant.SYS_TITLE_QS_))
+//                        .findFirst()
+//                        .map(ans -> ans.getAnswers() != null && !ans.getAnswers().isEmpty()
+//                                ? new ArrayList<>(ans.getAnswers()).get(0).getAnswer().trim()
+//                                : null)
+//                        .orElse("N/A")
+//        );
+//
+//        rentalPostResponse.setCategoryName(rentalPost.getCategory().getName());
+//        rentalPostResponse.setCategoryIconUrl(rentalPost.getCategory().getIconUrl());
+//        rentalPostResponse.setInterestedPeopleCount(rentalPost.getInterestedPeople().size());
+//        rentalPostResponse.setMobileNo(rentalPost.getOwner().getMobileNo());
+//
+//        return rentalPostResponse;
+//    }
 
     private static UserAnswerDFormQuestionResponse convert(UserAnswerDFormQuestion userAnswerDFormQuestion) {
         UserAnswerDFormQuestionResponse userAnswerDFormQuestionResponse = new UserAnswerDFormQuestionResponse();

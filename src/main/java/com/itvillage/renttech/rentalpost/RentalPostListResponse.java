@@ -1,13 +1,18 @@
 package com.itvillage.renttech.rentalpost;
 
-import com.itvillage.renttech.base.dto.BaseDto;
-import lombok.Data;
+import java.util.List;
 
-@Data
-public class RentalPostListResponse extends BaseDto {
-    private String mobileNo;
-    private String categoryName;
-    private String categoryIconUrl;
-    private String title;
-    private int interestedPeopleCount;
+public interface RentalPostListResponse {
+
+    String getId();
+
+    String getMobileNo();
+
+    String getCategoryName();
+
+    String getCategoryIconUrl();
+
+    List<AnswerProjection> getAnswers();
+
+    int getInterestedPeopleCount();
 }

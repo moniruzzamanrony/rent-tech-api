@@ -7,10 +7,7 @@ import com.itvillage.renttech.base.utils.ConverterUtils;
 import com.itvillage.renttech.base.utils.DateTimeUtils;
 import com.itvillage.renttech.base.utils.TokenUtils;
 import com.itvillage.renttech.category.CategoryService;
-import com.itvillage.renttech.dynamicform.DynamicFormQuestion;
-import com.itvillage.renttech.dynamicform.DynamicFormService;
-import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestion;
-import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestionRequest;
+import com.itvillage.renttech.dynamicform.*;
 import com.itvillage.renttech.notification.NotificationRequestDto;
 import com.itvillage.renttech.notification.NotificationService;
 import com.itvillage.renttech.rentpackages.PackageType;
@@ -95,7 +92,7 @@ public class RentalPostService {
 
 
             // Set the answers to the RentalPost entity
-            rentalPost.setFormQuestionsAnswer(answers);
+            rentalPost.setFormQuestionsAnswer(new HashSet<>(answers));
         }
 
         //Add RentPackage
@@ -132,7 +129,7 @@ public class RentalPostService {
     }
 
     public RentalPostResponse updateFiles(String rentalId, List<MultipartFile> files) {
-        RentalPost rentalPost = rentalPostRepository.findById(rentalId).orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
+        RentalPost rentalPost = rentalPostRepository.findFullById(rentalId).orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
 
         if (files != null && !files.isEmpty()) {
             List<RentalPostFile> newFiles = files.stream()
@@ -153,7 +150,7 @@ public class RentalPostService {
     }
 
     public RentalPostResponse deleteFile(String rentalId, String fileName) {
-        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+        RentalPost rentalPost = rentalPostRepository.findFullById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
 
         // Find the file to delete
@@ -173,7 +170,7 @@ public class RentalPostService {
     }
 
     public RentalPostResponse addInterestedPeople(String rentalId) {
-        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+        RentalPost rentalPost = rentalPostRepository.findFullById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
 
         User interestedUser = userService.getById(TokenUtils.getCurrentUserId())
@@ -182,12 +179,28 @@ public class RentalPostService {
 
         rentalPost = rentalPostRepository.save(rentalPost);
 
+
+        String title = "N/A";
+        if (rentalPost.getFormQuestionsAnswer() != null && !rentalPost.getFormQuestionsAnswer().isEmpty()) {
+
+            UserAnswerDFormQuestion firstQuestion =
+                    rentalPost.getFormQuestionsAnswer().iterator().next();
+
+            if (firstQuestion.getAnswers() != null && !firstQuestion.getAnswers().isEmpty()) {
+                UserAnswerValue firstAnswer =
+                        firstQuestion.getAnswers().iterator().next();
+
+                if (firstAnswer.getAnswer() != null) {
+                    title = firstAnswer.getAnswer();
+                }
+            }
+        }
         notificationService.save(
                 ConverterUtils.createNotificationRequestDto(
                         List.of(rentalPost.getOwner().getId()),
                         interestedUser.getName() + " is interested in your rental post",
                         "Post Id: " + rentalPost.getId() + "\n" +
-                                "Post Title: " + rentalPost.getFormQuestionsAnswer().getFirst().getAnswers().getFirst()));
+                                "Post Title: " + title));
         return ConverterUtils.convert(rentalPost);
     }
 
@@ -199,7 +212,7 @@ public class RentalPostService {
     }
 
     public RentalPostResponse getPostDetails(String rentalId) {
-        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+        RentalPost rentalPost = rentalPostRepository.findFullById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
         return ConverterUtils.convert(rentalPost,List.of("category","owner","formQuestionsAnswer","rentalPostFiles","interestedPeople"));
     }
@@ -221,7 +234,7 @@ public class RentalPostService {
 
     @Transactional
     public RentalPostResponse updateRentalPost(String rentalId, RentalPostRequest request) {
-        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+        RentalPost rentalPost = rentalPostRepository.findFullById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
 
         BeanUtils.copyProperties(request, rentalPost,
@@ -276,7 +289,7 @@ public class RentalPostService {
     }
 
     public void deleteRentalPost(String rentalId) {
-        RentalPost rentalPost = rentalPostRepository.findById(rentalId)
+        RentalPost rentalPost = rentalPostRepository.findFullById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
 
         // Delete associated files from S3

@@ -17,6 +17,7 @@ import com.itvillage.renttech.verification.user.UserPackageResponse;
 import com.itvillage.renttech.verification.user.UserResponse;
 import org.springframework.beans.BeanUtils;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,10 +34,11 @@ public class ConverterUtils {
         return dynamicFormQuestionResponse;
     }
 
-    public static UserResponse convert(User user) {
+    public static UserResponse convert(User user, List<String> includes) {
         UserResponse userResponse = new UserResponse();
         BeanUtils.copyProperties(user, userResponse, "userPackages");
-        userResponse.setUserPackages(user.getUserPackages().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
+        if(includes.contains("userPackages"))
+            userResponse.setUserPackages(user.getUserPackages().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
         return userResponse;
     }
 
@@ -57,10 +59,10 @@ public class ConverterUtils {
         RentalPostResponse rentalPostResponse = new RentalPostResponse();
         BeanUtils.copyProperties(rentalPost, rentalPostResponse,"owner","formQuestionsAnswer","rentalPostFiles", "category","interestedPeople");
         rentalPostResponse.setCategory(rentalPost.getCategory());
-        rentalPostResponse.setOwner(convert(rentalPost.getOwner()));
+        rentalPostResponse.setOwner(convert(rentalPost.getOwner(),List.of()));
         rentalPostResponse.setFormQuestionsAnswer(rentalPost.getFormQuestionsAnswer().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
-        rentalPostResponse.setRentalPostFiles(rentalPost.getRentalPostFiles());
-        rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(ConverterUtils::convert).collect(Collectors.toSet()));
+        rentalPostResponse.setRentalPostFiles(new ArrayList<>(rentalPost.getRentalPostFiles()));
+        rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(user -> convert(user,List.of())).collect(Collectors.toSet()));
         return rentalPostResponse;
     }
 
@@ -70,13 +72,13 @@ public class ConverterUtils {
         if (includes.contains("category"))
             rentalPostResponse.setCategory(rentalPost.getCategory());
         if (includes.contains("owner"))
-            rentalPostResponse.setOwner(convert(rentalPost.getOwner()));
+            rentalPostResponse.setOwner(convert(rentalPost.getOwner(),List.of()));
         if (includes.contains("formQuestionsAnswer"))
             rentalPostResponse.setFormQuestionsAnswer(rentalPost.getFormQuestionsAnswer().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
         if (includes.contains("rentalPostFiles"))
-            rentalPostResponse.setRentalPostFiles(rentalPost.getRentalPostFiles());
+            rentalPostResponse.setRentalPostFiles(new ArrayList<>(rentalPost.getRentalPostFiles()));
         if (includes.contains("interestedPeople"))
-            rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(ConverterUtils::convert).collect(Collectors.toSet()));
+            rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(user -> convert(user,List.of())).collect(Collectors.toSet()));
         return rentalPostResponse;
     }
     public static RentalPostListResponse convertToRentalPostListResponse(RentalPost rentalPost) {
@@ -87,7 +89,7 @@ public class ConverterUtils {
                         .filter(ans -> ans.getDynamicFormQuestion().getId().startsWith(ApiConstant.SYS_TITLE_QS_))
                         .findFirst()
                         .map(ans -> ans.getAnswers() != null && !ans.getAnswers().isEmpty()
-                                ? ans.getAnswers().get(0).getAnswer().trim()
+                                ? new ArrayList<>(ans.getAnswers()).get(0).getAnswer().trim()
                                 : null)
                         .orElse("N/A")
         );
@@ -111,8 +113,8 @@ public class ConverterUtils {
     public static NotificationResponseDto convert(Notification notification) {
         NotificationResponseDto notificationResponseDto = new NotificationResponseDto();
         BeanUtils.copyProperties(notification, notificationResponseDto);
-        notificationResponseDto.setSender(ConverterUtils.convert(notification.getSender()));
-        notificationResponseDto.setReceiver(ConverterUtils.convert(notification.getReceiver()));
+        notificationResponseDto.setSender(ConverterUtils.convert(notification.getSender(),List.of()));
+        notificationResponseDto.setReceiver(ConverterUtils.convert(notification.getReceiver(),List.of()));
         return notificationResponseDto;
     }
 

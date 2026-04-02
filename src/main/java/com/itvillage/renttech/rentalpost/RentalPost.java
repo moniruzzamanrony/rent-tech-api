@@ -5,10 +5,7 @@ import com.itvillage.renttech.category.Category;
 import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestion;
 import com.itvillage.renttech.verification.user.User;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -17,8 +14,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-@Data
-@Builder
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -52,13 +49,13 @@ public class RentalPost extends MagicBaseModel implements Serializable {
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     @JoinColumn(name = "rental_post_id")
-    private List<RentalPostFile> rentalPostFiles = new ArrayList<>();
+    private Set<RentalPostFile> rentalPostFiles = new HashSet<>();
 
     @OneToMany(fetch = FetchType.LAZY,
             cascade = CascadeType.ALL,
             orphanRemoval = true)
     @JoinColumn(name = "rental_post_id")
-    private List<UserAnswerDFormQuestion> formQuestionsAnswer = new ArrayList<>();
+    private Set<UserAnswerDFormQuestion> formQuestionsAnswer = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

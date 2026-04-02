@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.ZonedDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface RentalPostRepository extends JpaRepository<RentalPost, String> {
@@ -45,4 +46,19 @@ GROUP BY r.id, r.latitude, r.longitude, r.valid""", nativeQuery = true)
     Page<RentalPost> findAllByInterestedUserId(@Param("userId") String userId, Pageable pageable);
 
     List<RentalPost> findAllByValidTrueAndExpiryDateBefore(ZonedDateTime now);
+
+    @Query("""
+    SELECT DISTINCT r
+    FROM RentalPost r
+    LEFT JOIN FETCH r.owner
+    LEFT JOIN FETCH r.category
+    LEFT JOIN FETCH r.rentalPostFiles
+    LEFT JOIN FETCH r.formQuestionsAnswer fqa
+    LEFT JOIN FETCH fqa.dynamicFormQuestion dq
+    LEFT JOIN FETCH dq.defaultOptions
+    LEFT JOIN FETCH fqa.answers
+    LEFT JOIN FETCH r.interestedPeople
+    WHERE r.id = :rentalId
+""")
+    Optional<RentalPost> findFullById(@Param("rentalId") String rentalId);
 }

@@ -72,7 +72,7 @@ public class UserService {
         user = repository.save(user);
 
         return new APIResponseDto<>(
-                HttpStatus.OK.value(), ConverterUtils.convert(user));
+                HttpStatus.OK.value(), ConverterUtils.convert(user,List.of("userPackages")));
     }
 
     private void deleteOldProfilePictureIfExists(User user) {
@@ -88,13 +88,13 @@ public class UserService {
     public APIResponseDto<UserResponse> getProfile() {
         User user = getById(TokenUtils.getCurrentUserId()).orElseThrow();
         return new APIResponseDto<>(
-                HttpStatus.OK.value(), ConverterUtils.convert(user));
+                HttpStatus.OK.value(), ConverterUtils.convert(user,List.of("userPackages")));
     }
 
     public Page<UserResponse> getUsers(int page, int size, String role) {
         Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdDate"));
         Page<User> userPage = repository.findAllByRole(Role.valueOf(role), pageable);
-        return userPage.map(ConverterUtils::convert);
+        return userPage.map(user -> ConverterUtils.convert(user,List.of("userPackages")));
     }
 
 
@@ -138,7 +138,7 @@ public class UserService {
     public APIResponseDto<UserResponse> addCredit(String userId, int amount) {
         User user = addCoins(userId,amount);
 
-        return new APIResponseDto<>(HttpStatus.OK.value(), ConverterUtils.convert(user));
+        return new APIResponseDto<>(HttpStatus.OK.value(), ConverterUtils.convert(user,List.of("userPackages")));
     }
 
     public User addCoins(String userId, int amount) {

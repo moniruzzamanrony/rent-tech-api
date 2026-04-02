@@ -4,11 +4,11 @@ import com.itvillage.renttech.base.model.MagicBaseModel;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
 @Builder
 @Table(name = "user_answer_values",
         indexes = {

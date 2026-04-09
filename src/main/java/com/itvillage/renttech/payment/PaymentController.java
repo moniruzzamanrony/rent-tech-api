@@ -28,34 +28,32 @@ public class PaymentController {
         return new APIResponseDto<>(HttpStatus.OK.value(), epsPaymentService.createPayment(request));
     }
 
-    @GetMapping(ApiConstant.PUBLIC_BASE_API+"/payments/success")
-    public String paymentSuccess(
+    @GetMapping(ApiConstant.PRIVATE_BASE_API+"/payments/success")
+    public VerificationDto paymentSuccess(
             @RequestParam("Status") String status,
             @RequestParam("MerchantTransactionId") String merchantTransactionId,
             @RequestParam(value = "EPSTransactionId ", required = false) String epsTransactionId,
             @RequestParam(value = "ErrorCode", required = false) String errorCode
     ) {
 
-        epsPaymentService.updatePaymentStatus(
+       return epsPaymentService.updatePaymentStatus(
                 PaymentStatus.SUCCESS,
                 merchantTransactionId,
                 epsTransactionId,
                 status,
                 errorCode
         );
-
-        return "Payment SUCCESS for order: " + merchantTransactionId;
     }
 
-    @GetMapping(ApiConstant.PUBLIC_BASE_API+"/payments/fail")
-    public String paymentFailed(
+    @GetMapping(ApiConstant.PRIVATE_BASE_API+"/payments/fail")
+    public VerificationDto paymentFailed(
             @RequestParam("Status") String status,
             @RequestParam("MerchantTransactionId") String merchantTransactionId,
             @RequestParam(value = "EPSTransactionId", required = false) String epsTransactionId,
             @RequestParam(value = "ErrorCode", required = false) String errorCode
     ) {
 
-        epsPaymentService.updatePaymentStatus(
+        return  epsPaymentService.updatePaymentStatus(
                 PaymentStatus.FAILED,
                 merchantTransactionId,
                 epsTransactionId,
@@ -63,18 +61,17 @@ public class PaymentController {
                 errorCode
         );
 
-        return "Payment FAILED for order: " + merchantTransactionId;
     }
 
-    @GetMapping(ApiConstant.PUBLIC_BASE_API+"/payments/cancel")
-    public String paymentCancelled(
+    @GetMapping(ApiConstant.PRIVATE_BASE_API+"/payments/cancel")
+    public VerificationDto paymentCancelled(
             @RequestParam("Status") String status,
             @RequestParam("MerchantTransactionId") String merchantTransactionId,
             @RequestParam(value = "EPSTransactionId", required = false) String epsTransactionId,
             @RequestParam(value = "ErrorCode", required = false) String errorCode
     ) {
 
-        epsPaymentService.updatePaymentStatus(
+        return  epsPaymentService.updatePaymentStatus(
                 PaymentStatus.CANCELLED,
                 merchantTransactionId,
                 epsTransactionId,
@@ -82,7 +79,6 @@ public class PaymentController {
                 errorCode
         );
 
-        return "Payment CANCELLED for order: " + merchantTransactionId;
     }
 
     /**

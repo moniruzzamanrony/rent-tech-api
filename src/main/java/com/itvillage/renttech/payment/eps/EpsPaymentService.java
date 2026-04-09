@@ -54,9 +54,9 @@ public class EpsPaymentService {
         epsCreatePaymentRequest.setCustomerCountry(request.getBillingAddressDto().getCustomerCountry());
 
         epsCreatePaymentRequest.setProductName(request.getCoinQty() + " coins");
-        epsCreatePaymentRequest.setCancelUrl(epsConfig.getMyHostUrl() + ApiConstant.PUBLIC_BASE_API+"/payments/cancel");
-        epsCreatePaymentRequest.setFailUrl(epsConfig.getMyHostUrl() + ApiConstant.PUBLIC_BASE_API+"/payments/fail");
-        epsCreatePaymentRequest.setSuccessUrl(epsConfig.getMyHostUrl() + ApiConstant.PUBLIC_BASE_API+"/payments/success");
+        epsCreatePaymentRequest.setCancelUrl(epsConfig.getMyHostUrl() + ApiConstant.PRIVATE_BASE_API+"/payments/cancel");
+        epsCreatePaymentRequest.setFailUrl(epsConfig.getMyHostUrl() + ApiConstant.PRIVATE_BASE_API+"/payments/fail");
+        epsCreatePaymentRequest.setSuccessUrl(epsConfig.getMyHostUrl() + ApiConstant.PRIVATE_BASE_API+"/payments/success");
         epsCreatePaymentRequest.setValueA(String.valueOf(request.getCoinQty()));
 
         // 2️⃣ Save INIT payment in DB
@@ -133,14 +133,15 @@ public class EpsPaymentService {
     /**
      * Update payment status based on redirect query params
      */
-    public void updatePaymentStatus(
+    public VerificationDto updatePaymentStatus(
             PaymentStatus status,
             String merchantTransactionId,
             String epsTransactionId,
             String epsStatus,
             String errorCode
     ) {
-
+        VerificationDto verificationDto = new VerificationDto();
+        verificationDto.setMessage("Redirecting...");
         System.out.println("PaymentStatus Enum: " + status);
         System.out.println("EPS Status: " + epsStatus);
         System.out.println("MerchantTxnId: " + merchantTransactionId);
@@ -152,7 +153,7 @@ public class EpsPaymentService {
 
         if (optionalPayment.isEmpty()) {
             System.err.println("Payment not found for MerchantTransactionId: " + merchantTransactionId);
-            return;
+            verificationDto.setSuccess(false);
         }
 
         Payment payment = optionalPayment.get();
@@ -160,7 +161,7 @@ public class EpsPaymentService {
         // ✅ Prevent duplicate update (VERY IMPORTANT)
         if (payment.getStatus() == PaymentStatus.SUCCESS) {
             System.out.println("Payment already SUCCESS. Skipping update.");
-            return;
+            verificationDto.setSuccess(false);
         }
 
         // ✅ Update status based on EPS response (more reliable than URL path)
@@ -173,6 +174,7 @@ public class EpsPaymentService {
 
                 try {
                     userService.addCoins(payment.getUserId(),payment.getCoinQty());
+                    verificationDto.setSuccess(true);
                 } catch (Exception e) {
                     System.err.println("Failed to add coins to user: " + e.getMessage());
                 }
@@ -180,12 +182,15 @@ public class EpsPaymentService {
 
         } else if ("Failed".equalsIgnoreCase(epsStatus)) {
             payment.setStatus(PaymentStatus.FAILED);
+            verificationDto.setSuccess(false);
 
         } else if ("Cancelled".equalsIgnoreCase(epsStatus)) {
             payment.setStatus(PaymentStatus.CANCELLED);
+            verificationDto.setSuccess(false);
 
         } else {
             payment.setStatus(PaymentStatus.FAILED);
+            verificationDto.setSuccess(false);
         }
 
         payment.setErrorCode(errorCode);
@@ -193,6 +198,7 @@ public class EpsPaymentService {
         paymentRepository.save(payment);
 
         System.out.println("Payment updated successfully: " + merchantTransactionId);
+        return  verificationDto;
     }
 
     /**

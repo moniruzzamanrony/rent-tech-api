@@ -3,11 +3,11 @@
 set -euo pipefail  # strict mode
 
 APP_NAME='rent_tech'
-PASSWORD='SuSeba@00#SuSeba'
+PASSWORD='AVNSHiB7Cg0kpa4D8JOESP'
 JAR_NAME="rent-tech-api-0.0.1-SNAPSHOT.jar"
 JAR_LOCAL="./target/$JAR_NAME"
-REMOTE="root@209.97.161.90"
-REMOTE_PATH="/home/jar/$JAR_NAME"
+REMOTE="root@213.199.36.174"
+REMOTE_PATH="/root/$JAR_NAME"
 LOG_FILE="deploy.log"
 
 SSH_OPTIONS="-o StrictHostKeyChecking=no"
@@ -49,7 +49,7 @@ sshpass -p "$PASSWORD" scp $SSH_OPTIONS "$JAR_LOCAL" $REMOTE:$REMOTE_PATH
 # -----------------------------
 echo "Starting application..."
 sshpass -p "$PASSWORD" ssh $SSH_OPTIONS $REMOTE "
-nohup java -jar $REMOTE_PATH > /home/jar/$APP_NAME.log 2>&1 &
+nohup java -jar $REMOTE_PATH > /root/$APP_NAME.log 2>&1 &
 "
 
 echo "===================================="

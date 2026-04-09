@@ -14,5 +14,7 @@ public interface RentalPostListResponse {
 
     List<AnswerProjection> getAnswers();
 
+    String getTitle();
+
     int getInterestedPeopleCount();
 }

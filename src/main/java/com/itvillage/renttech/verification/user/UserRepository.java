@@ -15,9 +15,25 @@ import java.util.Set;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer> {
 
-  Optional<User> findByMobileNo(String phoneNo);
+  @Query("""
+    SELECT DISTINCT u
+    FROM User u
+    LEFT JOIN FETCH u.userPackages up
+    LEFT JOIN FETCH up.rentPackage
+    WHERE u.mobileNo = :mobileNo
+""")
+  Optional<User> findByMobileNo(@Param("mobileNo") String mobileNo);
 
-  Optional<User> findById(String userId);
+
+  @Query("""
+    SELECT DISTINCT u 
+    FROM User u
+    LEFT JOIN FETCH u.userPackages up
+    LEFT JOIN FETCH up.rentPackage
+    WHERE u.id = :userId
+""")
+  Optional<User> findFullUser(@Param("userId") String userId);
+  Optional<User> findById(@Param("userId") String userId);
 
   boolean existsByMobileNo(String phoneNo);
 

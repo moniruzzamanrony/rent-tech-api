@@ -21,7 +21,7 @@ public interface RentalPostRepository extends JpaRepository<RentalPost, String> 
                 u.mobileNo as mobileNo,
                 c.name as categoryName,
                 c.iconUrl as categoryIconUrl,
-                ans as answers,
+                ans.answer as title,
                 SIZE(r.interestedPeople) as interestedPeopleCount
             FROM RentalPost r
             JOIN r.owner u

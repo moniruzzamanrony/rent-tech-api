@@ -222,8 +222,7 @@ public class RentalPostService {
     }
 
     public Page<RentalPostListResponse> getMyInterestedRentalPost(Pageable pageable) {
-        return
-                rentalPostRepository.findAllByInterestedUserId(
+        return rentalPostRepository.findAllByInterestedUserId(
                         TokenUtils.getCurrentUserId(),
                         pageable
                 );

@@ -141,7 +141,6 @@ public class EpsPaymentService {
             String errorCode
     ) {
         VerificationDto verificationDto = new VerificationDto();
-        verificationDto.setMessage("Redirecting...");
         System.out.println("PaymentStatus Enum: " + status);
         System.out.println("EPS Status: " + epsStatus);
         System.out.println("MerchantTxnId: " + merchantTransactionId);
@@ -154,6 +153,7 @@ public class EpsPaymentService {
         if (optionalPayment.isEmpty()) {
             System.err.println("Payment not found for MerchantTransactionId: " + merchantTransactionId);
             verificationDto.setSuccess(false);
+            verificationDto.setMessage("Payment not found for MerchantTransactionId: " + merchantTransactionId);
         }
 
         Payment payment = optionalPayment.get();
@@ -162,6 +162,7 @@ public class EpsPaymentService {
         if (payment.getStatus() == PaymentStatus.SUCCESS) {
             System.out.println("Payment already SUCCESS. Skipping update.");
             verificationDto.setSuccess(false);
+            verificationDto.setMessage("Payment already SUCCESS. Skipping update.");
         }
 
         // ✅ Update status based on EPS response (more reliable than URL path)
@@ -175,7 +176,10 @@ public class EpsPaymentService {
                 try {
                     userService.addCoins(payment.getUserId(),payment.getCoinQty());
                     verificationDto.setSuccess(true);
+                    verificationDto.setMessage("Successfully added coins to user");
                 } catch (Exception e) {
+                    verificationDto.setSuccess(false);
+                    verificationDto.setMessage("Failed to add coins to user");
                     System.err.println("Failed to add coins to user: " + e.getMessage());
                 }
             }
@@ -183,14 +187,17 @@ public class EpsPaymentService {
         } else if ("Failed".equalsIgnoreCase(epsStatus)) {
             payment.setStatus(PaymentStatus.FAILED);
             verificationDto.setSuccess(false);
+            verificationDto.setMessage("Payment failed as per EPS response");
 
         } else if ("Cancelled".equalsIgnoreCase(epsStatus)) {
             payment.setStatus(PaymentStatus.CANCELLED);
             verificationDto.setSuccess(false);
+            verificationDto.setMessage("Payment cancelled as per EPS response");
 
         } else {
             payment.setStatus(PaymentStatus.FAILED);
             verificationDto.setSuccess(false);
+            verificationDto.setMessage("Payment failed as per EPS response");
         }
 
         payment.setErrorCode(errorCode);

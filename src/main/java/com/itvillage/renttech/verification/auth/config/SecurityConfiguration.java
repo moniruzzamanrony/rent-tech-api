@@ -50,7 +50,7 @@ public class SecurityConfiguration {
   @Bean
   public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration config = new CorsConfiguration();
-    config.setAllowedOriginPatterns(List.of("http://localhost:8081")); // your Angular URL
+    config.setAllowedOriginPatterns(List.of("http://localhost:8081","http://localhost:4700","http://213.199.36.174/","http://admin.mapmark.live/","https://admin.mapmark.live/")); // your Angular URL
     config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
     config.setAllowedHeaders(List.of("Authorization", "Content-Type"));
     config.setAllowCredentials(true);

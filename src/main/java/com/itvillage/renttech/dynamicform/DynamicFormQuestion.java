@@ -58,4 +58,6 @@ public class DynamicFormQuestion extends MagicBaseModel implements Serializable 
     private Set<QuestionOption> defaultOptions = new HashSet<>();
 
     private int position;
+
+    private boolean deleted = false;
 }

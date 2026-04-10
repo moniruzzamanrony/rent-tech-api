@@ -137,14 +137,10 @@ public class DynamicFormService {
     }
 
     public void deleteQuestion(String questionId) {
-
-        if (hasAnyAnswer(questionId))
-            throw new MagicException.NotPermittedException("Question has answers");
-
         DynamicFormQuestion dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Question not found"));
-
-        dynamicFormQuestionRepository.delete(dynamicFormQuestion);
+        dynamicFormQuestion.setDeleted(true);
+        dynamicFormQuestionRepository.save(dynamicFormQuestion);
     }
 
     private boolean hasAnyAnswer(String questionId) {

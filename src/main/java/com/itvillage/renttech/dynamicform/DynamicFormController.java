@@ -31,7 +31,21 @@ public class DynamicFormController {
         return new APIResponseDto<>(HttpStatus.OK.value(),
                 dynamicFormService.createDynamicFormQuestion(request, file));
     }
+    @PutMapping(value = "/{id}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public APIResponseDto<DynamicFormQuestionResponse> updateDynamicFormQuestion(
+            @PathVariable String id,
+            @RequestPart("request") String requestString,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        DynamicFormQuestionRequest request =
+                objectMapper.readValue(requestString, DynamicFormQuestionRequest.class);
 
+        return new APIResponseDto<>(
+                HttpStatus.OK.value(),
+                dynamicFormService.updateDynamicFormQuestion(id, request, file)
+        );
+    }
 
     @PostMapping(
             value = "/questions/{questionId}/options",
@@ -46,6 +60,35 @@ public class DynamicFormController {
         QuestionOptionRequest request = mapper.readValue(requestString, QuestionOptionRequest.class);
         DynamicFormQuestionResponse response =
                 dynamicFormService.addOptionsInQuestion(questionId, request, file);
+        return new APIResponseDto<>(HttpStatus.OK.value(), response);
+    }
+
+    @PutMapping(
+            value = "/questions/{questionId}/options/{optionId}",
+            consumes = MediaType.MULTIPART_FORM_DATA_VALUE
+    )
+    public APIResponseDto<DynamicFormQuestionResponse> updateOptionInQuestion(
+            @PathVariable String questionId,
+            @PathVariable String optionId,
+            @RequestPart("data") String requestString,
+            @RequestPart(value = "file", required = false) MultipartFile file
+    ) throws JsonProcessingException {
+        ObjectMapper objectMapper = new ObjectMapper();
+        QuestionOptionRequest request =
+                objectMapper.readValue(requestString, QuestionOptionRequest.class);
+
+        DynamicFormQuestionResponse response =
+                dynamicFormService.updateOptionInQuestion(questionId, optionId, request, file);
+
+        return new APIResponseDto<>(HttpStatus.OK.value(), response);
+    }
+
+    @PostMapping( "/questions/position/update")
+    public APIResponseDto<List<DynamicFormQuestionResponse>> updatePositionOfDynamicQs(
+            @RequestBody List<DynamicFormQuestionRequest> dynamicFormQuestionRequests) {
+
+        List<DynamicFormQuestionResponse> response =
+                dynamicFormService.updatePositionOfDynamicQs(dynamicFormQuestionRequests);
         return new APIResponseDto<>(HttpStatus.OK.value(), response);
     }
 

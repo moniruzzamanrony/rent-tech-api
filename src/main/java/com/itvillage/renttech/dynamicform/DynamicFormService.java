@@ -11,7 +11,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -81,6 +84,58 @@ public class DynamicFormService {
         return ConverterUtils.convert(dynamicFormQuestionRepository.save(dynamicFormQuestion));
     }
 
+    public DynamicFormQuestionResponse updateOptionInQuestion(
+            String questionId,
+            String optionId,
+            QuestionOptionRequest request,
+            MultipartFile file
+    ) {
+
+        // 1. Fetch question
+        DynamicFormQuestion question = dynamicFormQuestionRepository.findById(questionId)
+                .orElseThrow(() ->
+                        new MagicException.NotFoundException("Question not found")
+                );
+
+        // 2. Fetch option
+        QuestionOption option = questionOptionRepository.findById(optionId)
+                .orElseThrow(() ->
+                        new MagicException.NotFoundException("Option not found")
+                );
+
+        // 3. Validate option belongs to question (IMPORTANT)
+        if (!option.getQuestion().getId().equals(questionId)) {
+            throw new MagicException.BadRequestException("Option does not belong to this question");
+        }
+
+        // 4. Unique check (exclude current option)
+        boolean exists = questionOptionRepository
+                .existsByValueAndQuestionIdAndIdNot(
+                        request.getValue(),
+                        questionId,
+                        optionId
+                );
+
+        if (exists) {
+            throw new MagicException.AlreadyExistsException("Question option value already exists");
+        }
+
+        // 5. Update fields (avoid overriding ID, relation, file)
+        BeanUtils.copyProperties(request, option, "id", "question", "iconUrl");
+
+        // 6. File handling (replace only if new file comes)
+        if (file != null && !file.isEmpty()) {
+            String url = spaceService.uploadFile(file);
+            option.setIconUrl(url);
+        }
+
+        // 7. Save option (no need to re-add to list)
+        questionOptionRepository.save(option);
+
+        // 8. Return updated question
+        return ConverterUtils.convert(question);
+    }
+
     public void deleteQuestion(String questionId) {
 
         if (hasAnyAnswer(questionId))
@@ -127,4 +182,94 @@ public class DynamicFormService {
     public List<DynamicFormQuestion> getByIds(Set<String> questionIds) {
         return dynamicFormQuestionRepository.findAllByIdIn(questionIds);
     }
+
+    public List<DynamicFormQuestionResponse> updatePositionOfDynamicQs(
+            List<DynamicFormQuestionRequest> requests) {
+
+        // 1. Extract all IDs
+        List<String> ids = requests.stream()
+                .map(DynamicFormQuestionRequest::getId)
+                .toList();
+
+        // 2. Fetch all in ONE query
+        List<DynamicFormQuestion> questions = dynamicFormQuestionRepository.findAllById(ids);
+
+        // 3. Convert list → map for O(1) lookup
+        Map<String, DynamicFormQuestion> questionMap = questions.stream()
+                .collect(Collectors.toMap(DynamicFormQuestion::getId, Function.identity()));
+
+        // 4. Update positions
+        for (DynamicFormQuestionRequest request : requests) {
+            DynamicFormQuestion question = questionMap.get(request.getId());
+
+            if (question == null) {
+                throw new MagicException.NotFoundException("Question not found: " + request.getId());
+            }
+
+            question.setPosition(request.getPosition());
+        }
+
+        // 5. Save all (batch)
+        List<DynamicFormQuestion> updated = dynamicFormQuestionRepository.saveAll(questions);
+
+        // 6. Convert response
+        return updated.stream()
+                .map(ConverterUtils::convert)
+                .toList();
+    }
+
+    public DynamicFormQuestionResponse updateDynamicFormQuestion(
+            String id,
+            DynamicFormQuestionRequest request,
+            MultipartFile file
+    ) {
+
+        // 1. Fetch existing question
+        DynamicFormQuestion question = dynamicFormQuestionRepository.findById(id)
+                .orElseThrow(() ->
+                        new MagicException.NotFoundException("Question not found")
+                );
+
+        // 2. Validation (exclude current ID)
+        if (request.getPurposeType() == PurposeType.AMENITIES) {
+            boolean exists = dynamicFormQuestionRepository
+                    .existsByCategoryIdAndPurposeTypeAndIdNot(
+                            request.getCategoryId(),
+                            PurposeType.AMENITIES,
+                            id
+                    );
+
+            if (exists) {
+                throw new MagicException.AlreadyExistsException("Amenities already exists");
+            }
+        }
+
+        // 3. Update basic fields (avoid overwriting ID)
+        BeanUtils.copyProperties(request, question, "id", "category", "answerViewIconUrl");
+
+        // 4. Update category (if changed)
+        if (request.getCategoryId() != null &&
+                (question.getCategory() == null ||
+                        !question.getCategory().getId().equals(request.getCategoryId()))) {
+
+            Category category = categoryRepository.findById(request.getCategoryId())
+                    .orElseThrow(() ->
+                            new MagicException.NotFoundException("Category not found")
+                    );
+
+            question.setCategory(category);
+        }
+
+        // 5. File handling (replace only if new file comes)
+        if (file != null && !file.isEmpty()) {
+            String url = spaceService.uploadFile(file);
+            question.setAnswerViewIconUrl(url);
+        }
+
+        // 6. Save
+        DynamicFormQuestion updated = dynamicFormQuestionRepository.save(question);
+
+        return ConverterUtils.convert(updated);
+    }
+
 }

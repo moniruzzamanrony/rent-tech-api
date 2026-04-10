@@ -37,4 +37,6 @@ public interface DynamicFormQuestionRepository extends JpaRepository<DynamicForm
             @Param("catId") String catId,
             @Param("purposeType") PurposeType purposeType
     );
+
+    boolean existsByCategoryIdAndPurposeTypeAndIdNot(String categoryId, PurposeType purposeType, String id);
 }

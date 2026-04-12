@@ -33,8 +33,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 
-import static com.itvillage.renttech.base.utils.PhoneNumberUtils.isValidBDPhone;
-
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -55,7 +53,7 @@ public class UserService {
             UserRequest request,
             MultipartFile file
     ) {
-        User user = repository.findById(TokenUtils.getCurrentUserId())
+        User user = repository.findFullUser(TokenUtils.getCurrentUserId())
                 .orElseThrow(() -> new MagicException.BadRequestException("User not found"));
 
         BeanUtils.copyProperties(request, user, "profilePicUrl");
@@ -103,7 +101,7 @@ public class UserService {
     }
 
     public Optional<User> getById(String id) {
-        return repository.findById(id);
+        return repository.findFullUser(id);
     }
 
 

@@ -24,6 +24,13 @@ spring:
     username: doadmin
     password: AVNS_HiB7Cg0kpa4D8JOE_SP
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+    hikari:
+      maximum-pool-size: 30
+      minimum-idle: 10
+      idle-timeout: 30000
+      connection-timeout: 20000
+      max-lifetime: 1800000
   # ===============================
   # JPA / Hibernate
   # ===============================

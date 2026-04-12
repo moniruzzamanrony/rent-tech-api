@@ -104,15 +104,32 @@ public class RentalPostService {
             rentalPost.setExpiryDate(DateTimeUtils.addDays(ZonedDateTime.now(), rentPackage.getValidityInDays()));
 
         rentalPost.setValid(true);
-        //Manage Lat long
-        Optional<UserAnswerDFormQuestionRequest> dFormQuestionRequestOptional = request.getFormQuestionsAnswer().stream().filter(userAnswerDFormQuestionRequest -> userAnswerDFormQuestionRequest.getDynamicFormQuestionId().startsWith("SYS_LOCATION")).findFirst();
-        if(dFormQuestionRequestOptional.isPresent())
-        {
-            UserAnswerDFormQuestionRequest userAnswerDFormQuestionRequest = dFormQuestionRequestOptional.get();
-            String[] latLong =  userAnswerDFormQuestionRequest.getAnswers().getFirst().split(",");
-            rentalPost.setLatitude(Double.parseDouble(latLong[0]));
-            rentalPost.setLongitude(Double.parseDouble(latLong[1]));
-        }
+        //Manage Lat long, And Name from dynamic form answer
+        Map<String, String> answersMap = request.getFormQuestionsAnswer().stream()
+                .filter(q -> q.getDynamicFormQuestionId() != null && q.getAnswers() != null && !q.getAnswers().isEmpty())
+                .collect(Collectors.toMap(
+                        UserAnswerDFormQuestionRequest::getDynamicFormQuestionId,
+                        q -> q.getAnswers().getFirst(),
+                        (a, b) -> a
+                ));
+
+        RentalPost finalRentalPost = rentalPost;
+        answersMap.forEach((id, answer) -> {
+
+            if (id.startsWith("SYS_LOCATION")) {
+                String[] latLong = answer.split(",");
+                if (latLong.length == 2) {
+                    try {
+                        finalRentalPost.setLatitude(Double.parseDouble(latLong[0].trim()));
+                        finalRentalPost.setLongitude(Double.parseDouble(latLong[1].trim()));
+                    } catch (Exception ignored) {}
+                }
+            }
+
+            if (id.startsWith("SYS_TITLE")) {
+                finalRentalPost.setName(answer);
+            }
+        });
         rentalPost = rentalPostRepository.save(rentalPost);
 
         // Convert entity to DTO to return to the client

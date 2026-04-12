@@ -58,7 +58,7 @@ public class AuthService {
     otp.setValid(true);
     otp.setPhoneNo(phoneNo);
     otpRepository.save(otp);
-//    smsService.sendSms(new SMSRequest(phoneNo, " Your onetime OTP is: " + otpCode));
+    smsService.sendSms(new SMSRequest(phoneNo, " Your onetime OTP is: " + otpCode));
     return new APIResponseDto<Boolean>(HttpStatus.OK.value(), false);
   }
 

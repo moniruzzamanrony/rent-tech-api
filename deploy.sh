@@ -1,18 +1,16 @@
 #!/bin/bash
 
-set -euo pipefail  # strict mode
+set -euo pipefail
 
-APP_NAME='rent_tech'
 PASSWORD='AVNSHiB7Cg0kpa4D8JOESP'
-JAR_NAME="rent-tech-api-0.0.1-SNAPSHOT.jar"
-JAR_LOCAL="./target/$JAR_NAME"
 REMOTE="root@213.199.36.174"
-REMOTE_PATH="/root/$JAR_NAME"
+REMOTE_DIR="/root/rent-tech"
+ARCHIVE="/tmp/rent-tech.tar.gz"
 LOG_FILE="deploy.log"
 
-SSH_OPTIONS="-o StrictHostKeyChecking=no"
+SSH="sshpass -p $PASSWORD ssh -o StrictHostKeyChecking=no $REMOTE"
+SCP="sshpass -p $PASSWORD scp -o StrictHostKeyChecking=no"
 
-# Redirect ALL output (stdout + stderr) to log file AND console
 exec > >(tee -a "$LOG_FILE") 2>&1
 
 echo "===================================="
@@ -20,36 +18,32 @@ echo "Deployment started at $(date)"
 echo "===================================="
 
 # -----------------------------
-# Stop old application
+# Package source
 # -----------------------------
-echo "Stopping old application..."
-RUNNING=$(sshpass -p "$PASSWORD" ssh $SSH_OPTIONS $REMOTE "pgrep -f $JAR_NAME" || true)
-
-if [ -n "$RUNNING" ]; then
-    sshpass -p "$PASSWORD" ssh $SSH_OPTIONS $REMOTE "pkill -f $JAR_NAME"
-    echo "✅ Application stopped (PID: $RUNNING)"
-else
-    echo "ℹ No running application found"
-fi
+echo "Packaging source..."
+tar --exclude='.git' \
+    --exclude='target' \
+    --exclude='*.log' \
+    -czf "$ARCHIVE" .
 
 # -----------------------------
-# Delete old JAR
+# Upload
 # -----------------------------
-echo "Deleting old JAR..."
-sshpass -p "$PASSWORD" ssh $SSH_OPTIONS $REMOTE "rm -f $REMOTE_PATH"
+echo "Uploading to server..."
+$SSH "mkdir -p $REMOTE_DIR"
+$SCP "$ARCHIVE" "$REMOTE:$REMOTE_DIR/rent-tech.tar.gz"
+rm -f "$ARCHIVE"
 
 # -----------------------------
-# Upload new JAR
+# Build and deploy
 # -----------------------------
-echo "Uploading new JAR..."
-sshpass -p "$PASSWORD" scp $SSH_OPTIONS "$JAR_LOCAL" $REMOTE:$REMOTE_PATH
-
-# -----------------------------
-# Start application
-# -----------------------------
-echo "Starting application..."
-sshpass -p "$PASSWORD" ssh $SSH_OPTIONS $REMOTE "
-nohup java -jar $REMOTE_PATH > /root/$APP_NAME.log 2>&1 &
+echo "Building and deploying..."
+$SSH "
+  cd $REMOTE_DIR
+  tar -xzf rent-tech.tar.gz
+  rm -f rent-tech.tar.gz
+  docker compose down
+  docker compose up --build -d
 "
 
 echo "===================================="

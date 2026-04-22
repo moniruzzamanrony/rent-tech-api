@@ -1,0 +1,8 @@
+services:
+  api:
+    build: .
+    image: rent-tech-api:latest
+    container_name: rent-tech-api
+    ports:
+      - "6002:6002"
+    restart: unless-stopped

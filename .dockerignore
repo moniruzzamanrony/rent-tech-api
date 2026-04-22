@@ -1,0 +1,9 @@
+target/
+.git/
+.gitignore
+.idea/
+*.iml
+*.log
+deploy.sh
+docker-compose*.yml
+.env

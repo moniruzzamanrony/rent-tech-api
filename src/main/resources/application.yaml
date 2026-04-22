@@ -5,20 +5,6 @@ spring:
   # ===============================
   # Datasource Configuration
   # ===============================
-
-  # Server DB
-  # datasource:
-  #   url: jdbc:mysql://db-mysql-sgp1-84255-do-user-15655474-0.h.db.ondigitalocean.com:25060/vromon_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-  #   username: doadmin
-  #   password: AVNS_HiB7Cg0kpa4D8JOE_SP
-  #   driver-class-name: com.mysql.cj.jdbc.Driver
-
-  # Local DB
-#  datasource:
-#    url: jdbc:mysql://localhost:3306/rent_tech_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-#    username: root
-#    password: password
-#    driver-class-name: com.mysql.cj.jdbc.Driver
   datasource:
     url: jdbc:mysql://db-mysql-sgp1-84255-do-user-15655474-0.h.db.ondigitalocean.com:25060/rent_tech_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
     username: doadmin
@@ -95,6 +81,9 @@ do:
     region: sgp1
     bucket: vromon
 
+# ===============================
+# Payment Gateway (EPS)
+# ===============================
 payment-gateway:
   eps:
     my-host-url: https://api.mapmark.live

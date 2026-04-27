@@ -12,6 +12,8 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import java.util.Base64;
 import java.util.UUID;
 
+import static com.itvillage.renttech.base.modules.s3.UrlCreatorUtils.buildUrl;
+
 @Service
 public class SpaceService {
 
@@ -64,10 +66,7 @@ public class SpaceService {
 
             s3Client.putObject(request, RequestBody.fromBytes(file.getBytes()));
 
-            return String.format(
-                    "https://%s.%s.cdn.digitaloceanspaces.com/%s/%s",
-                    bucketName, region, bucketName, fileName
-            );
+            return region + "<brk>" + bucketName + "<brk>" + fileName;
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -116,15 +115,15 @@ public class SpaceService {
 
         s3Client.putObject(request, RequestBody.fromBytes(fileBytes));
 
-        // Return CDN URL
-        return String.format("https://%s.%s.cdn.digitaloceanspaces.com/%s/%s",
-                bucketName, region, bucketName, fileName);
+        return region + "<brk>" + bucketName + "<brk>" + fileName;
     }
 
 
     public void deleteFile(String fileName) {
-        // if full URL is given, extract file name
-        if (fileName.contains("/")) {
+        if (fileName.contains("<brk>")) {
+            String[] parts = fileName.split("<brk>", -1);
+            fileName = parts[parts.length - 1];
+        } else if (fileName.contains("/")) {
             fileName = fileName.substring(fileName.lastIndexOf("/") + 1);
         }
 

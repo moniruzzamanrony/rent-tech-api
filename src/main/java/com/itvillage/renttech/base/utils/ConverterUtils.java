@@ -2,6 +2,7 @@ package com.itvillage.renttech.base.utils;
 
 
 import com.itvillage.renttech.base.constants.ApiConstant;
+import com.itvillage.renttech.base.modules.s3.UrlCreatorUtils;
 import com.itvillage.renttech.category.Category;
 import com.itvillage.renttech.category.CategoryResponse;
 import com.itvillage.renttech.dynamicform.*;
@@ -9,6 +10,7 @@ import com.itvillage.renttech.notification.Notification;
 import com.itvillage.renttech.notification.NotificationRequestDto;
 import com.itvillage.renttech.notification.NotificationResponseDto;
 import com.itvillage.renttech.rentalpost.RentalPost;
+import com.itvillage.renttech.rentalpost.RentalPostFile;
 import com.itvillage.renttech.rentalpost.RentalPostListResponse;
 import com.itvillage.renttech.rentalpost.RentalPostResponse;
 import com.itvillage.renttech.verification.user.User;
@@ -26,6 +28,7 @@ public class ConverterUtils {
         DynamicFormQuestionResponse dynamicFormQuestionResponse = new DynamicFormQuestionResponse();
         BeanUtils.copyProperties(dynamicFormQuestion, dynamicFormQuestionResponse, "category");
         dynamicFormQuestionResponse.setCategory(dynamicFormQuestion.getCategory());
+        dynamicFormQuestionResponse.setAnswerViewIconUrl(UrlCreatorUtils.buildUrl(dynamicFormQuestion.getAnswerViewIconUrl()));
         if (dynamicFormQuestion.getDefaultOptions() != null) {
             dynamicFormQuestionResponse.setDefaultOptions(dynamicFormQuestion.getDefaultOptions().stream()
                     .map(ConverterUtils::convert)
@@ -37,6 +40,7 @@ public class ConverterUtils {
     public static UserResponse convert(User user, List<String> includes) {
         UserResponse userResponse = new UserResponse();
         BeanUtils.copyProperties(user, userResponse, "userPackages");
+        userResponse.setProfilePicUrl(UrlCreatorUtils.buildUrl(user.getProfilePicUrl()));
         if(includes.contains("userPackages"))
             userResponse.setUserPackages(user.getUserPackages().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
         return userResponse;
@@ -52,6 +56,7 @@ public class ConverterUtils {
     public static QuestionOptionResponse convert(QuestionOption questionOption) {
         QuestionOptionResponse questionOptionResponse = new QuestionOptionResponse();
         BeanUtils.copyProperties(questionOption, questionOptionResponse);
+        questionOptionResponse.setIconUrl(UrlCreatorUtils.buildUrl(questionOption.getIconUrl()));
         return questionOptionResponse;
     }
 
@@ -61,7 +66,7 @@ public class ConverterUtils {
         rentalPostResponse.setCategory(rentalPost.getCategory());
         rentalPostResponse.setOwner(convert(rentalPost.getOwner(),List.of()));
         rentalPostResponse.setFormQuestionsAnswer(rentalPost.getFormQuestionsAnswer().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
-        rentalPostResponse.setRentalPostFiles(new ArrayList<>(rentalPost.getRentalPostFiles()));
+        rentalPostResponse.setRentalPostFiles(rentalPost.getRentalPostFiles().stream().map(ConverterUtils::convertFile).collect(Collectors.toList()));
         rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(user -> convert(user,List.of())).collect(Collectors.toSet()));
         return rentalPostResponse;
     }
@@ -76,10 +81,17 @@ public class ConverterUtils {
         if (includes.contains("formQuestionsAnswer"))
             rentalPostResponse.setFormQuestionsAnswer(rentalPost.getFormQuestionsAnswer().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
         if (includes.contains("rentalPostFiles"))
-            rentalPostResponse.setRentalPostFiles(new ArrayList<>(rentalPost.getRentalPostFiles()));
+            rentalPostResponse.setRentalPostFiles(rentalPost.getRentalPostFiles().stream().map(ConverterUtils::convertFile).collect(Collectors.toList()));
         if (includes.contains("interestedPeople"))
             rentalPostResponse.setInterestedPeople(rentalPost.getInterestedPeople().stream().map(user -> convert(user,List.of())).collect(Collectors.toSet()));
         return rentalPostResponse;
+    }
+
+    private static RentalPostFile convertFile(RentalPostFile file) {
+        RentalPostFile copy = new RentalPostFile();
+        BeanUtils.copyProperties(file, copy);
+        copy.setUrl(UrlCreatorUtils.buildUrl(file.getUrl()));
+        return copy;
     }
 //    public static RentalPostListResponse convertToRentalPostListResponse(RentalPost rentalPost) {
 //        RentalPostListResponse rentalPostResponse = new RentalPostListResponse();
@@ -129,6 +141,7 @@ public class ConverterUtils {
     public static CategoryResponse convert(Category category) {
         CategoryResponse categoryResponse = new CategoryResponse();
         BeanUtils.copyProperties(category, categoryResponse);
+        categoryResponse.setIconUrl(UrlCreatorUtils.buildUrl(category.getIconUrl()));
         return categoryResponse;
     }
 }

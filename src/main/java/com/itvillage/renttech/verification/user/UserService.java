@@ -6,7 +6,6 @@ import com.itvillage.renttech.base.expection.MagicException;
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
 import com.itvillage.renttech.base.utils.DateTimeUtils;
-import com.itvillage.renttech.base.utils.FileUtils;
 import com.itvillage.renttech.base.utils.TokenUtils;
 import com.itvillage.renttech.rentpackages.PackageType;
 import com.itvillage.renttech.rentpackages.RentPackage;
@@ -75,10 +74,8 @@ public class UserService {
 
     private void deleteOldProfilePictureIfExists(User user) {
         String oldUrl = user.getProfilePicUrl();
-
         if (oldUrl != null && !oldUrl.isBlank()) {
-            String fileName = FileUtils.getFileNameFromUrl(oldUrl);
-            spaceService.deleteFile(fileName);
+            spaceService.deleteFile(oldUrl);
         }
     }
 

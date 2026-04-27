@@ -4,9 +4,9 @@ spring:
 
   # Server DB
   datasource:
-    url: jdbc:mysql://db-mysql-sgp1-84255-do-user-15655474-0.h.db.ondigitalocean.com:25060/rent_tech_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-    username: doadmin
-    password: AVNS_HiB7Cg0kpa4D8JOE_SP
+    url: jdbc:mysql://79.143.188.39:3306/rent_tech_db?useSSL=true&requireSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    username: rent_tech_user
+    password: Rent@SecureDB2026!
     driver-class-name: com.mysql.cj.jdbc.Driver
 
     hikari:
@@ -27,7 +27,7 @@ spring:
       ddl-auto: update  # or create, create-drop, validate, none
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.MySQL8Dialect
+        dialect: org.hibernate.dialect.MySQLDialect
         show_sql: false
   jackson:
     serialization:

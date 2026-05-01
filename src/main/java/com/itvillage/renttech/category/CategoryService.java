@@ -90,19 +90,6 @@ public class CategoryService extends MagicService<Category, String> {
         dynamicFormService.createDynamicFormQuestion(postTitle, null);
 
         // POST TITLE QUESTION
-        DynamicFormQuestionRequest addressQs = new DynamicFormQuestionRequest();
-        addressQs.setId(ApiConstant.SYS_ADDRESS_QS_ + categoryId.substring(4));
-        addressQs.setCategoryId(categoryId);
-        addressQs.setQuestionType(QuestionType.INPUT);
-        addressQs.setLabel("Address");
-        addressQs.setPurposeType(PurposeType.OTHERS);
-        addressQs.setPlaceHolder("Enter Address");
-        addressQs.setInputType(InputType.TEXT);
-        addressQs.setPosition(4);
-        addressQs.setQsRequired(true);
-        dynamicFormService.createDynamicFormQuestion(addressQs, null);
-
-        // POST TITLE QUESTION
         DynamicFormQuestionRequest availableFromQs = new DynamicFormQuestionRequest();
         availableFromQs.setId(ApiConstant.SYS_AVAILABLE_FROM_QS_ + categoryId.substring(4));
         availableFromQs.setCategoryId(categoryId);

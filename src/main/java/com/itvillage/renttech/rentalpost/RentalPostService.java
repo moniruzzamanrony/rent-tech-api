@@ -1,6 +1,7 @@
 package com.itvillage.renttech.rentalpost;
 
 
+import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.expection.MagicException;
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
@@ -99,7 +100,7 @@ public class RentalPostService {
 
                     String answer = q.getAnswers().getFirst();
 
-                    if (qId != null && qId.startsWith("SYS_LOCATION")) {
+                    if (qId != null && qId.startsWith(ApiConstant.SYS_LOCATION_QS_)) {
                         String[] latLong = answer.split(",");
                         if (latLong.length == 2) {
                             try {
@@ -109,13 +110,27 @@ public class RentalPostService {
                         }
                     }
 
-                    if (qId != null && qId.startsWith("SYS_TITLE")) {
+                    if (qId != null && qId.startsWith(ApiConstant.SYS_TITLE_QS_)) {
                         rentalPost.setName(answer);
+                    }
+                    if (qId != null && qId.startsWith(ApiConstant.SYS_PRICE_QS_)) {
+                        rentalPost.setPrice(answer);
+                    }
+                    if (qId != null && qId.startsWith(ApiConstant.SYS_AVAILABLE_FROM_QS_)) {
+                        rentalPost.setAvailableFrom(answer);
                     }
                 }
             }
 
             rentalPost.setFormQuestionsAnswer(new HashSet<>(answers));
+
+            String specIds = answers.stream()
+                    .filter(a -> PurposeType.SPECIFICATION.equals(a.getDynamicFormQuestion().getPurposeType()))
+                    .sorted(Comparator.comparingInt(a -> a.getDynamicFormQuestion().getPosition()))
+                    .limit(3)
+                    .map(a -> a.getDynamicFormQuestion().getId())
+                    .collect(Collectors.joining(","));
+            rentalPost.setFirst3SpecificationsIds(specIds.isEmpty() ? null : specIds);
         }
 
         // =========================

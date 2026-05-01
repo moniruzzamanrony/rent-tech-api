@@ -9,7 +9,6 @@ import lombok.*;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -29,6 +28,21 @@ public class RentalPost extends MagicBaseModel implements Serializable {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    private String availableFrom;
+
+    private String price;
+
+    //id1,id2,id3
+    private String first3SpecificationsIds;
+
+    private String address;
+
+    private String division;
+
+    private String zilla;
+
+    private String thanaOrUpazila;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)

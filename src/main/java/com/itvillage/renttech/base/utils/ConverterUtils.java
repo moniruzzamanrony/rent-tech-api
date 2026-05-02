@@ -41,8 +41,8 @@ public class ConverterUtils {
         UserResponse userResponse = new UserResponse();
         BeanUtils.copyProperties(user, userResponse, "userPackages");
         userResponse.setProfilePicUrl(UrlCreatorUtils.buildUrl(user.getProfilePicUrl()));
-        if(includes.contains("userPackages"))
-            userResponse.setUserPackages(user.getUserPackages().stream().map(ConverterUtils::convert).collect(Collectors.toList()));
+        if (includes.contains("userPackages") && !user.getUserPackages().isEmpty())
+            userResponse.setActivePackage(convert(user.getUserPackages().iterator().next()));
         return userResponse;
     }
 

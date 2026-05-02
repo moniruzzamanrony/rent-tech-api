@@ -8,6 +8,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 @Getter
 @Setter
@@ -28,4 +29,16 @@ public class RentalPostFile extends MagicBaseModel implements Serializable {
 
     @Column(name = "url", nullable = false)
     private String url;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof RentalPostFile that)) return false;
+        return this.getId() != null && this.getId().equals(that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

@@ -22,6 +22,14 @@ public class RentalPostResponse extends BaseDto {
 
     private double longitude;
 
+    private String address;
+
+    private String division;
+
+    private String zilla;
+
+    private String thanaOrUpazila;
+
     private List<RentalPostFile> rentalPostFiles = new ArrayList<>();
 
     private List<UserAnswerDFormQuestionResponse> formQuestionsAnswer = new ArrayList<>();

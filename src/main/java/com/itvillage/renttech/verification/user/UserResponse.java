@@ -5,9 +5,6 @@ import com.itvillage.renttech.base.dto.BaseDto;
 import jakarta.persistence.Convert;
 import lombok.Data;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @Data
 public class UserResponse extends BaseDto {
   private String name;
@@ -28,5 +25,5 @@ public class UserResponse extends BaseDto {
 
   private String universityName;
 
-  private List<UserPackageResponse> userPackages = new ArrayList<>();
+  private UserPackageResponse activePackage;
 }

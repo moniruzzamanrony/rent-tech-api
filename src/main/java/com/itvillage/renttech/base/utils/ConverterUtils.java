@@ -114,7 +114,7 @@ public class ConverterUtils {
 //        return rentalPostResponse;
 //    }
 
-    private static UserAnswerDFormQuestionResponse convert(UserAnswerDFormQuestion userAnswerDFormQuestion) {
+    public static UserAnswerDFormQuestionResponse convert(UserAnswerDFormQuestion userAnswerDFormQuestion) {
         UserAnswerDFormQuestionResponse userAnswerDFormQuestionResponse = new UserAnswerDFormQuestionResponse();
         BeanUtils.copyProperties(userAnswerDFormQuestion, userAnswerDFormQuestionResponse, "answers");
         userAnswerDFormQuestionResponse.setQuestion(convert(userAnswerDFormQuestion.getDynamicFormQuestion()));

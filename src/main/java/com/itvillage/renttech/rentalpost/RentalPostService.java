@@ -263,9 +263,20 @@ public class RentalPostService {
         return ConverterUtils.convert(rentalPost,List.of("category","owner","formQuestionsAnswer","rentalPostFiles","interestedPeople"));
     }
 
-    public List<RentalMapMarkerProjection> getPostLocationByCategory(String categoryId) {
-        List<RentalMapMarkerProjection> rentalPosts = rentalPostRepository.findAllByCategoryId(categoryId);
-        return rentalPosts;
+    public List<RentalMapMarkerResponse> getPostLocationByCategory(String categoryId) {
+        return rentalPostRepository.findAllByCategoryIdForMap(categoryId).stream()
+                .map(post -> {
+                    RentalMapMarkerResponse response = new RentalMapMarkerResponse();
+                    BeanUtils.copyProperties(post, response, "formQuestionsAnswer", "interestedPeople", "rentalPostFiles", "category", "owner");
+                    List<UserAnswerDFormQuestionResponse> specAnswers = post.getFormQuestionsAnswer().stream()
+                            .sorted(Comparator.comparingInt((UserAnswerDFormQuestion a) -> a.getDynamicFormQuestion().getPosition()))
+                            .limit(3)
+                            .map(a -> ConverterUtils.convert(a))
+                            .toList();
+                    response.setFirst3Specifications(specAnswers);
+                    return response;
+                })
+                .toList();
     }
 
     public Page<RentalPostListResponse> getMyInterestedRentalPost(Pageable pageable) {

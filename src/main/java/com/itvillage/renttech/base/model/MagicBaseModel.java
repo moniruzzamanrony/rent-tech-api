@@ -38,6 +38,8 @@ public class MagicBaseModel implements Serializable {
 
     private String updatedBy;
 
+    private boolean delete;
+
     @PrePersist
     public void onPrePersist() {
         ZonedDateTime now = ZonedDateTime.now(ZoneId.of("UTC"));

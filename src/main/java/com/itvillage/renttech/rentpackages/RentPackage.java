@@ -27,4 +27,5 @@ public class RentPackage extends MagicBaseModel {
     @Convert(converter = PackageType.PackageTypeConverter.class)
     @Column(name = "package_type")
     private PackageType packageType;
+
 }

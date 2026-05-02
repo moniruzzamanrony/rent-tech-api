@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -233,5 +234,31 @@ public class UserService {
     public APIResponseDto<Boolean> hasPurchasePackage() {
         boolean hasPurchasePackage = repository.existsByIdAndUserPackagesIsNotEmpty(TokenUtils.getCurrentUserId());
         return new APIResponseDto<>(HttpStatus.OK.value(), hasPurchasePackage);
+    }
+
+    public Page<UserAdminResponse> getAdminUsers(int page, int size, String sortBy, String sortDir, String mobileNo) {
+        Set<String> allowedSortFields = Set.of("totalSpendAmount", "countTotalPost", "createdDate");
+        String resolvedSort = allowedSortFields.contains(sortBy) ? sortBy : "createdDate";
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, resolvedSort));
+        return repository.findAdminUsers(mobileNo, pageable).map(this::toAdminResponse);
+    }
+
+    private UserAdminResponse toAdminResponse(UserAdminProjection p) {
+        UserAdminResponse r = new UserAdminResponse();
+        r.setId(p.getId());
+        r.setName(p.getName());
+        r.setMobileNo(p.getMobileNo());
+        r.setGender(Gender.fromCode(p.getGender()));
+        r.setNidNumber(p.getNidNumber());
+        r.setPresentAddress(p.getPresentAddress());
+        r.setCurrentCoins(p.getCurrentCoins());
+        r.setProfilePicUrl(p.getProfilePicUrl());
+        r.setProfession(Profession.fromCode(p.getProfession()));
+        r.setUniversityName(p.getUniversityName());
+        r.setCountTotalPurchaseSearchingPackages((int) p.getCountTotalPurchaseSearchingPackages());
+        r.setTotalSpeanAmount((int) p.getTotalSpendAmount());
+        r.setCountTotalPost((int) p.getCountTotalPost());
+        return r;
     }
 }

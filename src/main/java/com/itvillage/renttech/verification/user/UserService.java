@@ -21,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -237,10 +238,10 @@ public class UserService {
     }
 
     public Page<UserAdminResponse> getAdminUsers(int page, int size, String sortBy, String sortDir, String mobileNo) {
-        Set<String> allowedSortFields = Set.of("totalSpendAmount", "countTotalPost", "createdDate");
+        Set<String> allowedSortFields = Set.of("createdDate");
         String resolvedSort = allowedSortFields.contains(sortBy) ? sortBy : "createdDate";
         Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, resolvedSort));
+        Pageable pageable = PageRequest.of(page, size, JpaSort.unsafe(direction, resolvedSort));
         return repository.findAdminUsers(mobileNo, pageable).map(this::toAdminResponse);
     }
 

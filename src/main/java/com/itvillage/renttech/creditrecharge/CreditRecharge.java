@@ -5,7 +5,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import jakarta.persistence.Column;
 import lombok.Data;
+import org.hibernate.annotations.SQLRestriction;
 
+@SQLRestriction("is_deleted = false")
 @Entity
 @Data
 @Table(name = "credit_recharge")

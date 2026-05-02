@@ -59,20 +59,22 @@ public interface UserRepository extends JpaRepository<User, Integer> {
           u.created_date    AS createdDate,
           (SELECT COUNT(up.id)
            FROM user_package up
-           WHERE up.user_id = u.id)                                           AS countTotalPurchaseSearchingPackages,
+           WHERE up.user_id = u.id AND up.is_deleted = false)                 AS countTotalPurchaseSearchingPackages,
           (SELECT COALESCE(SUM(rp.price_in_coins), 0)
            FROM user_package up
            JOIN rent_package rp ON rp.id = up.rent_package_id
-           WHERE up.user_id = u.id)                                           AS totalSpendAmount,
+           WHERE up.user_id = u.id AND up.is_deleted = false)                 AS totalSpendAmount,
           (SELECT COUNT(post.id)
            FROM rental_post post
-           WHERE post.user_id = u.id)                                         AS countTotalPost
+           WHERE post.user_id = u.id AND post.is_deleted = false)             AS countTotalPost
       FROM users u
-      WHERE (COALESCE(:mobileNo, '') = '' OR u.mobile_no LIKE CONCAT('%', :mobileNo, '%'))
+      WHERE u.is_deleted = false
+        AND (COALESCE(:mobileNo, '') = '' OR u.mobile_no LIKE CONCAT('%', :mobileNo, '%'))
       """,
       countQuery = """
           SELECT COUNT(u.id) FROM users u
-          WHERE (COALESCE(:mobileNo, '') = '' OR u.mobile_no LIKE CONCAT('%', :mobileNo, '%'))
+          WHERE u.is_deleted = false
+            AND (COALESCE(:mobileNo, '') = '' OR u.mobile_no LIKE CONCAT('%', :mobileNo, '%'))
           """,
       nativeQuery = true)
   Page<UserAdminProjection> findAdminUsers(@Param("mobileNo") String mobileNo, Pageable pageable);

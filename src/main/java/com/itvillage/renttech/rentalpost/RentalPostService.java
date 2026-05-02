@@ -209,9 +209,10 @@ public class RentalPostService {
         // Delete file from S3
         spaceService.deleteFile(fileToDelete.getUrl());
 
-        // Remove file from the list and save the rental post
-        rentalPost.getRentalPostFiles().remove(fileToDelete);
-        rentalPost = rentalPostRepository.save(rentalPost);
+        // Soft delete: mark as deleted, cascade saves it, remove from in-memory set for clean response
+        fileToDelete.setDelete(true);
+        rentalPostRepository.save(rentalPost);
+        rentalPost.getRentalPostFiles().removeIf(f -> f.isDelete());
 
         return ConverterUtils.convert(rentalPost);
     }
@@ -356,7 +357,8 @@ public class RentalPostService {
         notificationRequestDto.setReceiverIds(rentalPost.getInterestedPeople().stream().map(User::getId).toList());
         notificationService.save(notificationRequestDto);
 
-        rentalPostRepository.delete(rentalPost);
+        rentalPost.setDelete(true);
+        rentalPostRepository.save(rentalPost);
     }
 
     @Transactional

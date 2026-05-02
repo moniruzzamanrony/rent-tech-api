@@ -38,6 +38,7 @@ public class MagicBaseModel implements Serializable {
 
     private String updatedBy;
 
+    @Column(name = "is_deleted")
     private boolean delete;
 
     @PrePersist

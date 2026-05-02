@@ -6,6 +6,7 @@ import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestion;
 import com.itvillage.renttech.verification.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
@@ -13,6 +14,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@SQLRestriction("is_deleted = false")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -61,8 +63,7 @@ public class RentalPost extends MagicBaseModel implements Serializable {
     private double longitude;
 
     @OneToMany(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            cascade = CascadeType.ALL)
     @JoinColumn(name = "rental_post_id")
     private Set<RentalPostFile> rentalPostFiles = new HashSet<>();
 

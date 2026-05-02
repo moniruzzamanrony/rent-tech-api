@@ -6,10 +6,12 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.io.Serializable;
 import java.util.Objects;
 
+@SQLRestriction("is_deleted = false")
 @Getter
 @Setter
 @NoArgsConstructor

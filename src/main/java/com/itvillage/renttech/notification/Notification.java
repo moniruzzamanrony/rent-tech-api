@@ -4,7 +4,9 @@ import com.itvillage.renttech.base.model.MagicBaseModel;
 import com.itvillage.renttech.verification.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
+@SQLRestriction("is_deleted = false")
 @Entity
 @Table(
         name = "notification",

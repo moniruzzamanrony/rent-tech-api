@@ -2,7 +2,6 @@ package com.itvillage.renttech.rentalpost;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -69,6 +68,20 @@ public interface RentalPostRepository extends JpaRepository<RentalPost, String> 
             """)
     Page<RentalPostListResponse> findAllByInterestedUserId(
             @Param("userId") String userId,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT r
+            FROM RentalPost r
+            JOIN r.owner u
+            JOIN r.category c
+            WHERE (:categoryName IS NULL OR :categoryName = '' OR LOWER(c.name) LIKE LOWER(CONCAT('%', :categoryName, '%')))
+            AND (:ownerPhoneNo IS NULL OR :ownerPhoneNo = '' OR u.mobileNo LIKE CONCAT('%', :ownerPhoneNo, '%'))
+            """)
+    Page<RentalPost> findAdminRentalPosts(
+            @Param("categoryName") String categoryName,
+            @Param("ownerPhoneNo") String ownerPhoneNo,
             Pageable pageable
     );
 

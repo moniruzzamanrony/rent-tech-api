@@ -22,7 +22,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -285,6 +288,32 @@ public class RentalPostService {
                         TokenUtils.getCurrentUserId(),
                         pageable
                 );
+    }
+
+    @Transactional
+    public Page<RentalPostAdminResponse> getAdminRentalPosts(
+            int page,
+            int size,
+            String sortDir,
+            String categoryName,
+            String ownerPhoneNo
+    ) {
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, JpaSort.unsafe(direction, "createdDate"));
+
+        return rentalPostRepository
+                .findAdminRentalPosts(categoryName, ownerPhoneNo, pageable)
+                .map(this::toAdminResponse);
+    }
+
+    private RentalPostAdminResponse toAdminResponse(RentalPost rentalPost) {
+        RentalPostAdminResponse response = new RentalPostAdminResponse();
+        BeanUtils.copyProperties(rentalPost, response, "owner", "category", "formQuestionsAnswer", "rentalPostFiles", "interestedPeople");
+        response.setOwnerName(rentalPost.getOwner().getName());
+        response.setOwnerPhoneNo(rentalPost.getOwner().getMobileNo());
+        response.setCategoryName(rentalPost.getCategory().getName());
+        response.setCountInterestedPeople(rentalPost.getInterestedPeople().size());
+        return response;
     }
 
     @Transactional

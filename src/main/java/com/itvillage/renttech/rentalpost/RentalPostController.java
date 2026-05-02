@@ -87,6 +87,20 @@ public class RentalPostController {
         return new APIResponseDto<>(HttpStatus.OK.value(), responses);
     }
 
+    @GetMapping("/admin")
+    public APIResponseDto<Page<RentalPostAdminResponse>> getAdminRentalPosts(
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(required = false) String ownerPhoneNo,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return new APIResponseDto<>(
+                HttpStatus.OK.value(),
+                rentalPostService.getAdminRentalPosts(page, size, sortDir, categoryName, ownerPhoneNo)
+        );
+    }
+
 
     @DeleteMapping("/{rentalId}")
     public APIResponseDto<String> deleteRentalPost(@PathVariable String rentalId) {

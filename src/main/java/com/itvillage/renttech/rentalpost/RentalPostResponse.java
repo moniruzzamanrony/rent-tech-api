@@ -16,11 +16,11 @@ public class RentalPostResponse extends BaseDto {
 
     private UserResponse owner;
 
-    private Category category;
+    private String name;
 
-    private double latitude;
+    private String availableFrom;
 
-    private double longitude;
+    private String price;
 
     private String address;
 
@@ -29,6 +29,12 @@ public class RentalPostResponse extends BaseDto {
     private String zilla;
 
     private String thanaOrUpazila;
+
+    private Category category;
+
+    private double latitude;
+
+    private double longitude;
 
     private List<RentalPostFile> rentalPostFiles = new ArrayList<>();
 

@@ -118,8 +118,23 @@ public class ConverterUtils {
         UserAnswerDFormQuestionResponse userAnswerDFormQuestionResponse = new UserAnswerDFormQuestionResponse();
         BeanUtils.copyProperties(userAnswerDFormQuestion, userAnswerDFormQuestionResponse, "answers");
         userAnswerDFormQuestionResponse.setQuestion(convert(userAnswerDFormQuestion.getDynamicFormQuestion()));
-        userAnswerDFormQuestionResponse.setAnswers(userAnswerDFormQuestion.getAnswersAsStrings());
+        if (userAnswerDFormQuestion.getAnswers() != null) {
+            userAnswerDFormQuestionResponse.setAnswers(
+                    userAnswerDFormQuestion.getAnswers().stream()
+                            .map(ConverterUtils::convert)
+                            .collect(Collectors.toList())
+            );
+        }
         return userAnswerDFormQuestionResponse;
+    }
+
+    public static UserAnswerResponse convert(UserAnswerValue userAnswerValue) {
+        UserAnswerResponse response = new UserAnswerResponse();
+        response.setValue(userAnswerValue.getAnswer());
+        if (userAnswerValue.getQuestionOption() != null) {
+            response.setOption(convert(userAnswerValue.getQuestionOption()));
+        }
+        return response;
     }
 
     public static NotificationResponseDto convert(Notification notification) {

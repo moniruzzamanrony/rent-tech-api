@@ -8,6 +8,6 @@ import java.util.List;
 public class UserAnswerDFormQuestionRequest {
     private String dynamicFormQuestionId;
 
-    private List<String> answers;
+    private List<UserAnswerRequest> answers;
 
 }

@@ -45,6 +45,7 @@ public class RentalPostService {
     private final SpaceService spaceService;
     private final NotificationService notificationService;
     private final RentPackageRepository rentPackageRepository;
+    private final QuestionOptionRepository questionOptionRepository;
 
     @Transactional
     public RentalPostResponse createRentalPost(RentalPostRequest request) {
@@ -79,6 +80,8 @@ public class RentalPostService {
                     dynamicFormService.getByIds(questionIds).stream()
                             .collect(Collectors.toMap(DynamicFormQuestion::getId, q -> q));
 
+            Map<String, QuestionOption> optionMap = loadAndValidateOptionMap(request.getFormQuestionsAnswer());
+
             List<UserAnswerDFormQuestion> answers = new ArrayList<>();
 
             for (UserAnswerDFormQuestionRequest q : request.getFormQuestionsAnswer()) {
@@ -93,36 +96,45 @@ public class RentalPostService {
                 // Create answer entity
                 UserAnswerDFormQuestion answerEntity = new UserAnswerDFormQuestion();
                 answerEntity.setDynamicFormQuestion(question);
-                answerEntity.setAnswersFromStrings(q.getAnswers());
-                answers.add(answerEntity);
 
-                // =========================
-                // 🔥 Handle SYS fields (single pass)
-                // =========================
                 if (q.getAnswers() != null && !q.getAnswers().isEmpty()) {
+                    Set<UserAnswerValue> userAnswerValues = q.getAnswers().stream().map(userAnswerRequest -> {
+                        UserAnswerValue userAnswerValue = new UserAnswerValue();
+                        String optionId = userAnswerRequest.getOptionId();
+                        if (optionId != null && !optionId.isBlank()) {
+                            userAnswerValue.setQuestionOption(optionMap.get(optionId));
+                        }
+                        userAnswerValue.setAnswer(userAnswerRequest.getValue());
+                        userAnswerValue.setQuestion(answerEntity);
+                        return userAnswerValue;
+                    }).collect(Collectors.toSet());
+                    answerEntity.setAnswers(userAnswerValues);
 
-                    String answer = q.getAnswers().getFirst();
-
-                    if (qId != null && qId.startsWith(ApiConstant.SYS_LOCATION_QS_)) {
-                        String[] latLong = answer.split(",");
-                        if (latLong.length == 2) {
-                            try {
-                                rentalPost.setLatitude(Double.parseDouble(latLong[0].trim()));
-                                rentalPost.setLongitude(Double.parseDouble(latLong[1].trim()));
-                            } catch (Exception ignored) {}
+                    // Handle SYS fields from the first answer's value
+                    String answer = q.getAnswers().getFirst().getValue();
+                    if (answer != null && qId != null) {
+                        if (qId.startsWith(ApiConstant.SYS_LOCATION_QS_)) {
+                            String[] latLong = answer.split(",");
+                            if (latLong.length == 2) {
+                                try {
+                                    rentalPost.setLatitude(Double.parseDouble(latLong[0].trim()));
+                                    rentalPost.setLongitude(Double.parseDouble(latLong[1].trim()));
+                                } catch (Exception ignored) {}
+                            }
+                        }
+                        if (qId.startsWith(ApiConstant.SYS_TITLE_QS_)) {
+                            rentalPost.setName(answer);
+                        }
+                        if (qId.startsWith(ApiConstant.SYS_PRICE_QS_)) {
+                            rentalPost.setPrice(answer);
+                        }
+                        if (qId.startsWith(ApiConstant.SYS_AVAILABLE_FROM_QS_)) {
+                            rentalPost.setAvailableFrom(answer);
                         }
                     }
-
-                    if (qId != null && qId.startsWith(ApiConstant.SYS_TITLE_QS_)) {
-                        rentalPost.setName(answer);
-                    }
-                    if (qId != null && qId.startsWith(ApiConstant.SYS_PRICE_QS_)) {
-                        rentalPost.setPrice(answer);
-                    }
-                    if (qId != null && qId.startsWith(ApiConstant.SYS_AVAILABLE_FROM_QS_)) {
-                        rentalPost.setAvailableFrom(answer);
-                    }
                 }
+
+                answers.add(answerEntity);
             }
 
             rentalPost.setFormQuestionsAnswer(new HashSet<>(answers));
@@ -335,6 +347,8 @@ public class RentalPostService {
                     .stream()
                     .collect(Collectors.toMap(DynamicFormQuestion::getId, q -> q));
 
+            Map<String, QuestionOption> optionMap = loadAndValidateOptionMap(formAnswers);
+
             // Map existing answers by dynamicFormQuestionId
             Map<String, UserAnswerDFormQuestion> existingAnswerMap = rentalPost.getFormQuestionsAnswer()
                     .stream()
@@ -351,14 +365,24 @@ public class RentalPostService {
                 }
 
                 UserAnswerDFormQuestion answer = existingAnswerMap.get(req.getDynamicFormQuestionId());
-                if (answer != null) {
-                    // Update existing answer
-                    answer.setAnswersFromStrings(req.getAnswers());
-                } else {
-                    // Create new answer if it doesn't exist
+                if (answer == null) {
                     answer = new UserAnswerDFormQuestion();
                     answer.setDynamicFormQuestion(question);
-                    answer.setAnswersFromStrings(req.getAnswers());
+                }
+
+                // Replace child answers; orphanRemoval cleans up the old rows
+                answer.getAnswers().clear();
+                if (req.getAnswers() != null) {
+                    for (UserAnswerRequest userAnswerRequest : req.getAnswers()) {
+                        UserAnswerValue value = new UserAnswerValue();
+                        value.setAnswer(userAnswerRequest.getValue());
+                        String optionId = userAnswerRequest.getOptionId();
+                        if (optionId != null && !optionId.isBlank()) {
+                            value.setQuestionOption(optionMap.get(optionId));
+                        }
+                        value.setQuestion(answer);
+                        answer.getAnswers().add(value);
+                    }
                 }
                 updatedAnswers.add(answer);
             }
@@ -370,6 +394,29 @@ public class RentalPostService {
 
         RentalPost savedPost = rentalPostRepository.save(rentalPost);
         return ConverterUtils.convert(savedPost);
+    }
+
+    private Map<String, QuestionOption> loadAndValidateOptionMap(List<UserAnswerDFormQuestionRequest> formAnswers) {
+        Set<String> optionIds = formAnswers.stream()
+                .filter(q -> q.getAnswers() != null)
+                .flatMap(q -> q.getAnswers().stream())
+                .map(UserAnswerRequest::getOptionId)
+                .filter(id -> id != null && !id.isBlank())
+                .collect(Collectors.toSet());
+
+        if (optionIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, QuestionOption> optionMap = questionOptionRepository.findAllById(optionIds).stream()
+                .collect(Collectors.toMap(QuestionOption::getId, o -> o));
+
+        if (optionMap.size() != optionIds.size()) {
+            Set<String> missing = new HashSet<>(optionIds);
+            missing.removeAll(optionMap.keySet());
+            throw new MagicException.NotFoundException("Question option(s) not found: " + missing);
+        }
+        return optionMap;
     }
 
     public void deleteRentalPost(String rentalId) {

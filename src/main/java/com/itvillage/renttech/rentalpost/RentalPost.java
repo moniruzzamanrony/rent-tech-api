@@ -90,4 +90,9 @@ public class RentalPost extends MagicBaseModel implements Serializable {
 
     @Column(name = "expiry_date")
     private ZonedDateTime expiryDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "processing_status", nullable = false,
+            columnDefinition = "VARCHAR(20) NOT NULL DEFAULT 'READY'")
+    private ProcessingStatus processingStatus = ProcessingStatus.PENDING;
 }

@@ -111,6 +111,19 @@ public class RentalPostService {
         if (formAnswers == null || formAnswers.isEmpty()) {
             return;
         }
+
+        // Look up labels for the SYS questions whose labels we denormalize onto the post.
+        Set<String> labelQuestionIds = formAnswers.stream()
+                .map(UserAnswerDFormQuestionRequest::getDynamicFormQuestionId)
+                .filter(id -> id != null
+                        && (id.startsWith(ApiConstant.SYS_PRICE_QS_)
+                            || id.startsWith(ApiConstant.SYS_AVAILABLE_FROM_QS_)))
+                .collect(Collectors.toSet());
+        Map<String, String> labelByQid = labelQuestionIds.isEmpty()
+                ? Map.of()
+                : dynamicFormService.getByIds(labelQuestionIds).stream()
+                        .collect(Collectors.toMap(DynamicFormQuestion::getId, DynamicFormQuestion::getLabel));
+
         for (UserAnswerDFormQuestionRequest q : formAnswers) {
             String qId = q.getDynamicFormQuestionId();
             if (qId == null || q.getAnswers() == null || q.getAnswers().isEmpty()) {
@@ -132,9 +145,11 @@ public class RentalPostService {
                 rentalPost.setName(answer);
             }
             if (qId.startsWith(ApiConstant.SYS_PRICE_QS_)) {
+                rentalPost.setPriceLabel(labelByQid.get(qId));
                 rentalPost.setPrice(answer);
             }
             if (qId.startsWith(ApiConstant.SYS_AVAILABLE_FROM_QS_)) {
+                rentalPost.setAvailableFromLabel(labelByQid.get(qId));
                 rentalPost.setAvailableFrom(answer);
             }
         }

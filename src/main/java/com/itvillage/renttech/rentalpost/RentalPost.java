@@ -31,7 +31,11 @@ public class RentalPost extends MagicBaseModel implements Serializable {
     @Column(name = "name", nullable = false)
     private String name;
 
+    private String availableFromLabel;
+
     private String availableFrom;
+
+    private String priceLabel;
 
     private String price;
 

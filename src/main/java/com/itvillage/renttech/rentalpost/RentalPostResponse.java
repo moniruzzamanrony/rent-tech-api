@@ -18,7 +18,11 @@ public class RentalPostResponse extends BaseDto {
 
     private String name;
 
+    private String availableFromLabel;
+
     private String availableFrom;
+
+    private String priceLabel;
 
     private String price;
 

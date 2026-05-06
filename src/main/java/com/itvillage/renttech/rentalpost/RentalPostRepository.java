@@ -20,16 +20,12 @@ public interface RentalPostRepository extends JpaRepository<RentalPost, String> 
                 u.mobileNo as mobileNo,
                 c.name as categoryName,
                 c.iconUrl as categoryIconUrl,
-                ans.answer as title,
+                r.name as title,
                 SIZE(r.interestedPeople) as interestedPeopleCount
             FROM RentalPost r
             JOIN r.owner u
             JOIN r.category c
-            JOIN r.formQuestionsAnswer qa
-            JOIN qa.dynamicFormQuestion df
-            JOIN qa.answers ans
-            WHERE df.id LIKE 'SYS_TITLE%'
-            AND r.owner.id = :ownerId
+            WHERE  r.owner.id = :ownerId
             ORDER BY r.createdDate DESC
             """)
     Page<RentalPostListResponse> findRentalPostListByOwnerId(

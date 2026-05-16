@@ -42,11 +42,12 @@ public class ConverterUtils {
         BeanUtils.copyProperties(user, userResponse, "userPackages");
         userResponse.setProfilePicUrl(UrlCreatorUtils.buildUrl(user.getProfilePicUrl()));
         if (includes.contains("userPackages") && !user.getUserPackages().isEmpty())
-            userResponse.setActivePackage(convert(user.getUserPackages().iterator().next()));
+            userResponse.setActivePackage(convert(user.getUserPackages().stream().filter(UserPackage::isValid).findFirst().orElse(null)));
         return userResponse;
     }
 
     public static UserPackageResponse convert(UserPackage userPackage) {
+        if(userPackage == null) return null;
         UserPackageResponse userPackageResponse = new UserPackageResponse();
         BeanUtils.copyProperties(userPackage, userPackageResponse,  "rentPackage");
         userPackageResponse.setRentPackage(userPackage.getRentPackage());

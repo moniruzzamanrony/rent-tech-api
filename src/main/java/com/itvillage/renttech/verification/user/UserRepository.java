@@ -32,7 +32,6 @@ public interface UserRepository extends JpaRepository<User, Integer> {
     LEFT JOIN FETCH u.userPackages up
     LEFT JOIN FETCH up.rentPackage
     WHERE u.id = :userId
-    AND (up IS NULL OR up.valid = true)
 """)
   Optional<User> findFullUser(@Param("userId") String userId);
 

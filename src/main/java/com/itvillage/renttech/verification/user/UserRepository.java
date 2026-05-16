@@ -41,7 +41,15 @@ public interface UserRepository extends JpaRepository<User, Integer> {
 
   List<User> findAllByIdIn(Set<String> strings);
 
-  boolean existsByIdAndUserPackagesIsNotEmpty(String userId);
+  @Query("""
+    SELECT CASE WHEN COUNT(up) > 0 THEN true ELSE false END
+    FROM User u
+    JOIN u.userPackages up
+    WHERE u.id = :userId
+      AND up.valid = true
+      AND up.expiryDate > :now
+  """)
+  boolean existsByIdAndHasValidUserPackage(@Param("userId") String userId, @Param("now") ZonedDateTime now);
 
   @Query(value = """
       SELECT

@@ -5,9 +5,12 @@ import com.itvillage.renttech.base.utils.ConverterUtils;
 import com.itvillage.renttech.base.utils.TokenUtils;
 import com.itvillage.renttech.verification.user.User;
 import com.itvillage.renttech.verification.user.UserService;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -20,18 +23,15 @@ public class NotificationService {
   private final NotificationRepository notificationRepository;
   private final UserService userService;
 
-  public List<NotificationResponseDto> getLoggedUserNotifications() {
-    List<Notification> notifications =
-        notificationRepository.findAllByReceiverIdOrderByCreatedDateDesc(TokenUtils.getCurrentUserId());
-    List<NotificationResponseDto> notificationResponseDtos = notifications.stream().map(ConverterUtils::convert).toList();
-    markAsView(notifications);
-    return notificationResponseDtos;
+  @Transactional
+  public Page<NotificationResponseDto> getLoggedUserNotifications(Pageable pageable) {
+    String userId = TokenUtils.getCurrentUserId();
+    Page<NotificationResponseDto> page = notificationRepository
+        .findAllByReceiverIdOrderByCreatedDateDesc(userId, pageable)
+        .map(ConverterUtils::convert);
+    notificationRepository.markAllSeenByReceiverId(userId);
+    return page;
   }
-
-    private void markAsView(List<Notification> notifications) {
-      List<Notification> readNotifications = notifications.stream().peek(notification -> notification.setSeen(true)).toList();
-      notificationRepository.saveAll(readNotifications);
-    }
 
     public void save(NotificationRequestDto notificationRequestDto) {
     try {

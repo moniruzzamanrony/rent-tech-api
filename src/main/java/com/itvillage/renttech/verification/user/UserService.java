@@ -233,7 +233,8 @@ public class UserService {
 
 
     public APIResponseDto<Boolean> hasPurchasePackage() {
-        boolean hasPurchasePackage = repository.existsByIdAndUserPackagesIsNotEmpty(TokenUtils.getCurrentUserId());
+        boolean hasPurchasePackage = repository.existsByIdAndHasValidUserPackage(
+                TokenUtils.getCurrentUserId(), ZonedDateTime.now());
         return new APIResponseDto<>(HttpStatus.OK.value(), hasPurchasePackage);
     }
 

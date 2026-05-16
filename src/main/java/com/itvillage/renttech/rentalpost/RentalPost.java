@@ -28,7 +28,7 @@ import java.util.Set;
         })
 public class RentalPost extends MagicBaseModel implements Serializable {
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
     private String name;
 
     private String availableFromLabel;

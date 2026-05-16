@@ -56,6 +56,7 @@ public class DynamicFormQuestion extends MagicBaseModel implements Serializable 
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL
     )
+    @OrderBy("name ASC")
     private Set<QuestionOption> defaultOptions = new HashSet<>();
 
     private int position;

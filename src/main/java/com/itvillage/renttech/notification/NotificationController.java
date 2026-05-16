@@ -5,12 +5,12 @@ package com.itvillage.renttech.notification;
 import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.dto.APIResponseDto;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.List;
 
 @RestController
 @AllArgsConstructor
@@ -20,8 +20,8 @@ public class NotificationController {
 
 
     @GetMapping("/notifications")
-    public APIResponseDto<List<NotificationResponseDto>> getLoggedUserNotifications() {
-        List<NotificationResponseDto> loggedUserNotifications = notificationService.getLoggedUserNotifications();
+    public APIResponseDto<Page<NotificationResponseDto>> getLoggedUserNotifications(Pageable pageable) {
+        Page<NotificationResponseDto> loggedUserNotifications = notificationService.getLoggedUserNotifications(pageable);
         return new APIResponseDto<>(HttpStatus.OK.value(), loggedUserNotifications);
     }
 

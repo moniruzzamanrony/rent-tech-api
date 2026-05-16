@@ -45,10 +45,10 @@ public class CategoryAsyncService {
         postTitle.setQuestionType(QuestionType.INPUT);
         postTitle.setLabel("Post Title");
         postTitle.setPurposeType(PurposeType.OTHERS);
-        postTitle.setPlaceHolder("Enter Post Title");
+        postTitle.setPlaceHolder("E.g, 3 Bedroom Flat/ 1400sqft Flat");
         postTitle.setInputType(InputType.TEXT);
         postTitle.setPosition(3);
-        postTitle.setQsRequired(true);
+        postTitle.setQsRequired(false);
         dynamicFormService.createDynamicFormQuestion(postTitle, null);
 
         DynamicFormQuestionRequest availableFromQs = new DynamicFormQuestionRequest();

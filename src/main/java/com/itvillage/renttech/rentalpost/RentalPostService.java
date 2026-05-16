@@ -109,6 +109,9 @@ public class RentalPostService {
 
     private void applySysFields(RentalPost rentalPost, List<UserAnswerDFormQuestionRequest> formAnswers) {
         if (formAnswers == null || formAnswers.isEmpty()) {
+            if (rentalPost.getName() == null || rentalPost.getName().isBlank()) {
+                rentalPost.setName(resolveCategoryName(rentalPost));
+            }
             return;
         }
 
@@ -152,6 +155,77 @@ public class RentalPostService {
                 rentalPost.setAvailableFromLabel(labelByQid.get(qId));
                 rentalPost.setAvailableFrom(answer);
             }
+        }
+
+        if (rentalPost.getName() == null || rentalPost.getName().isBlank()) {
+            rentalPost.setName(generateFallbackName(rentalPost, formAnswers));
+        }
+    }
+
+    private String generateFallbackName(RentalPost rentalPost, List<UserAnswerDFormQuestionRequest> formAnswers) {
+        String categoryName = resolveCategoryName(rentalPost);
+
+        Set<String> specQids = formAnswers.stream()
+                .filter(a -> a.getDynamicFormQuestionId() != null
+                        && !a.getDynamicFormQuestionId().startsWith("SYS_")
+                        && a.getAnswers() != null
+                        && !a.getAnswers().isEmpty()
+                        && a.getAnswers().getFirst().getValue() != null
+                        && !a.getAnswers().getFirst().getValue().isBlank())
+                .map(UserAnswerDFormQuestionRequest::getDynamicFormQuestionId)
+                .collect(Collectors.toSet());
+
+        if (specQids.isEmpty()) {
+            return categoryName;
+        }
+
+        Map<String, DynamicFormQuestion> qById = dynamicFormService.getByIds(specQids).stream()
+                .collect(Collectors.toMap(DynamicFormQuestion::getId, q -> q));
+
+        UserAnswerDFormQuestionRequest firstSpec = formAnswers.stream()
+                .filter(a -> qById.containsKey(a.getDynamicFormQuestionId()))
+                .min(Comparator.comparingInt(a -> qById.get(a.getDynamicFormQuestionId()).getPosition()))
+                .orElse(null);
+
+        if (firstSpec == null) {
+            return categoryName;
+        }
+
+        String value = firstSpec.getAnswers().getFirst().getValue();
+        if (!isNumeric(value)) {
+            return categoryName;
+        }
+
+        String label = qById.get(firstSpec.getDynamicFormQuestionId()).getLabel();
+        StringBuilder name = new StringBuilder(value.trim());
+        if (label != null && !label.isBlank()) {
+            name.append(' ').append(label.trim());
+        }
+        if (categoryName != null && !categoryName.isBlank()) {
+            name.append(' ').append(categoryName.trim());
+        }
+        return name.toString();
+    }
+
+    private String resolveCategoryName(RentalPost rentalPost) {
+        if (rentalPost.getCategory() == null || rentalPost.getCategory().getId() == null) {
+            return "";
+        }
+        try {
+            Category fetched = categoryService.getById(rentalPost.getCategory().getId());
+            return fetched != null && fetched.getName() != null ? fetched.getName() : "";
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private boolean isNumeric(String value) {
+        if (value == null || value.isBlank()) return false;
+        try {
+            Double.parseDouble(value.trim());
+            return true;
+        } catch (NumberFormatException e) {
+            return false;
         }
     }
 

@@ -8,4 +8,5 @@ public class CategoryResponse extends BaseDto {
     private String name;
     private String iconUrl;
     private String description;
+    private boolean active;
 }

@@ -6,7 +6,9 @@ import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.SQLRestriction;
 
+@SQLRestriction("is_deleted = false")
 @Entity
 @Data
 @Table(name = "rent_package")
@@ -27,4 +29,5 @@ public class RentPackage extends MagicBaseModel {
     @Convert(converter = PackageType.PackageTypeConverter.class)
     @Column(name = "package_type")
     private PackageType packageType;
+
 }

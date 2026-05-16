@@ -72,8 +72,8 @@ public class RentalPostController {
     }
 
     @GetMapping("/categories/{categoryId}/location")
-    public APIResponseDto<List<RentalMapMarkerProjection>> getPostLocationByCategory(@PathVariable String categoryId) {
-        List<RentalMapMarkerProjection> responses = rentalPostService.getPostLocationByCategory(categoryId);
+    public APIResponseDto<List<RentalMapMarkerResponse>> getPostLocationByCategory(@PathVariable String categoryId) {
+        List<RentalMapMarkerResponse> responses = rentalPostService.getPostLocationByCategory(categoryId);
         return new APIResponseDto<>(HttpStatus.OK.value(), responses);
     }
 
@@ -85,6 +85,20 @@ public class RentalPostController {
                 rentalPostService.getMyInterestedRentalPost(pageable);
 
         return new APIResponseDto<>(HttpStatus.OK.value(), responses);
+    }
+
+    @GetMapping("/admin")
+    public APIResponseDto<Page<RentalPostAdminResponse>> getAdminRentalPosts(
+            @RequestParam(required = false) String categoryName,
+            @RequestParam(required = false) String ownerPhoneNo,
+            @RequestParam(defaultValue = "desc") String sortDir,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        return new APIResponseDto<>(
+                HttpStatus.OK.value(),
+                rentalPostService.getAdminRentalPosts(page, size, sortDir, categoryName, ownerPhoneNo)
+        );
     }
 
 

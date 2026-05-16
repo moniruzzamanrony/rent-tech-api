@@ -6,9 +6,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.io.Serializable;
 
+@SQLRestriction("is_deleted = false")
 @Data
 @Builder
 @NoArgsConstructor

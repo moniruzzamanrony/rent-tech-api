@@ -5,7 +5,9 @@ import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.SQLRestriction;
 
+@SQLRestriction("is_deleted = false")
 @Entity
 @Data
 @Table(name = "shifting_contact")

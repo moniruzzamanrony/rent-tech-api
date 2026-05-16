@@ -1,0 +1,270 @@
+====================================
+Deployment started at Thu Apr 23 04:45:59 AM +06 2026
+====================================
+Packaging source...
+Uploading to server...
+Building and deploying...
+ Image rent-tech-api:latest Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 481B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile:
+#2 transferring dockerfile: 1.11kB 0.0s done
+#2 DONE 0.3s
+
+#3 [internal] load metadata for docker.io/library/eclipse-temurin:21-jre-alpine
+#3 DONE 2.2s
+
+#4 [internal] load metadata for docker.io/library/eclipse-temurin:21-jdk-alpine
+#4 DONE 2.2s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 119B done
+#5 DONE 0.0s
+
+#6 [internal] load build context
+#6 DONE 0.0s
+
+#7 [runtime 1/5] FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:ad0cdd9782db550ca7dde6939a16fd850d04e683d37d3cff79d84a5848ba6a5a
+#7 resolve docker.io/library/eclipse-temurin:21-jre-alpine@sha256:ad0cdd9782db550ca7dde6939a16fd850d04e683d37d3cff79d84a5848ba6a5a
+#7 resolve docker.io/library/eclipse-temurin:21-jre-alpine@sha256:ad0cdd9782db550ca7dde6939a16fd850d04e683d37d3cff79d84a5848ba6a5a 0.1s done
+#7 DONE 0.5s
+
+#6 [internal] load build context
+#6 transferring context: 223.24kB 0.1s done
+#6 DONE 0.2s
+
+#8 [build 1/7] FROM docker.io/library/eclipse-temurin:21-jdk-alpine@sha256:bcc7ec7e8fef937ba9f01ee5f810361d722c6b5dbe19ac188ab7b25c1a4dd2c9
+#8 resolve docker.io/library/eclipse-temurin:21-jdk-alpine@sha256:bcc7ec7e8fef937ba9f01ee5f810361d722c6b5dbe19ac188ab7b25c1a4dd2c9 0.1s done
+#8 sha256:07c1bb0b54884876ce179c9ad3683a68d7689b97597df8b1b2dfeeaaf5e7b60e 0B / 2.28kB 0.2s
+#8 sha256:07c1bb0b54884876ce179c9ad3683a68d7689b97597df8b1b2dfeeaaf5e7b60e 2.28kB / 2.28kB 0.4s done
+#8 sha256:5b440bedad35bcaf95f5c16474e5bcdc67677eca1377bc3b6bd9a64aa13552d0 0B / 130B 0.2s
+#8 sha256:5b440bedad35bcaf95f5c16474e5bcdc67677eca1377bc3b6bd9a64aa13552d0 130B / 130B 0.4s done
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 0B / 158.12MB 0.2s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 0B / 21.32MB 0.2s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 2.10MB / 21.32MB 0.9s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 4.19MB / 21.32MB 1.5s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 6.29MB / 21.32MB 1.8s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 8.27MB / 21.32MB 2.0s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 10.49MB / 21.32MB 2.1s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 12.58MB / 21.32MB 2.3s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 8.39MB / 158.12MB 2.9s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 14.68MB / 21.32MB 2.4s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 16.78MB / 21.32MB 2.6s
+#8 sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 18.87MB / 21.32MB 2.7s
+#8 extracting sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 20.97MB / 158.12MB 4.1s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 32.51MB / 158.12MB 4.5s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 44.04MB / 158.12MB 5.0s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 54.53MB / 158.12MB 5.4s
+#8 extracting sha256:b5ef2c34364d42e41eb14af65c85cfcd9ba8407f18b51bde4f6428bff92388a2 2.2s done
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 65.89MB / 158.12MB 5.9s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 75.50MB / 158.12MB 6.3s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 87.03MB / 158.12MB 6.8s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 96.22MB / 158.12MB 7.2s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 106.95MB / 158.12MB 7.7s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 117.44MB / 158.12MB 8.1s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 128.97MB / 158.12MB 8.6s
+#8 ...
+
+#7 [runtime 1/5] FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:ad0cdd9782db550ca7dde6939a16fd850d04e683d37d3cff79d84a5848ba6a5a
+#7 sha256:83cc7558c41737fe273044d032b589323a9acd96790bbfd6cf2792647fb88e3b 53.17MB / 53.17MB 3.4s done
+#7 sha256:48e51247e7df3167f00ff9972116a308eb551b96eac8382fbf88e82d5866971c 2.28kB / 2.28kB 0.3s done
+#7 sha256:7659027a798a9c8fca5bfcbae2d24bd6b7ec65dfe5285d4b7c30c75ca0965299 128B / 128B 0.4s done
+#7 sha256:775c53a23a895a8fdcb2534de50a64b420d676e982f81a1e72e88f6b283280fe 16.84MB / 16.84MB 4.9s done
+#7 sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 3.86MB / 3.86MB 1.3s done
+#7 extracting sha256:6a0ac1617861a677b045b7ff88545213ec31c0ff08763195a70a4a5adda577bb 0.7s done
+#7 extracting sha256:775c53a23a895a8fdcb2534de50a64b420d676e982f81a1e72e88f6b283280fe 1.7s done
+#7 extracting sha256:83cc7558c41737fe273044d032b589323a9acd96790bbfd6cf2792647fb88e3b
+#7 ...
+
+#8 [build 1/7] FROM docker.io/library/eclipse-temurin:21-jdk-alpine@sha256:bcc7ec7e8fef937ba9f01ee5f810361d722c6b5dbe19ac188ab7b25c1a4dd2c9
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 139.46MB / 158.12MB 9.0s
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 150.39MB / 158.12MB 9.5s
+#8 ...
+
+#7 [runtime 1/5] FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:ad0cdd9782db550ca7dde6939a16fd850d04e683d37d3cff79d84a5848ba6a5a
+#7 extracting sha256:83cc7558c41737fe273044d032b589323a9acd96790bbfd6cf2792647fb88e3b 4.2s done
+#7 extracting sha256:7659027a798a9c8fca5bfcbae2d24bd6b7ec65dfe5285d4b7c30c75ca0965299 0.0s done
+#7 DONE 11.6s
+
+#7 [runtime 1/5] FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:ad0cdd9782db550ca7dde6939a16fd850d04e683d37d3cff79d84a5848ba6a5a
+#7 extracting sha256:48e51247e7df3167f00ff9972116a308eb551b96eac8382fbf88e82d5866971c 0.0s done
+#7 DONE 11.7s
+
+#8 [build 1/7] FROM docker.io/library/eclipse-temurin:21-jdk-alpine@sha256:bcc7ec7e8fef937ba9f01ee5f810361d722c6b5dbe19ac188ab7b25c1a4dd2c9
+#8 sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 158.12MB / 158.12MB 9.9s done
+#8 extracting sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d
+#8 ...
+
+#9 [runtime 2/5] WORKDIR /app
+#9 DONE 0.3s
+
+#10 [runtime 3/5] RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+#10 DONE 1.5s
+
+#8 [build 1/7] FROM docker.io/library/eclipse-temurin:21-jdk-alpine@sha256:bcc7ec7e8fef937ba9f01ee5f810361d722c6b5dbe19ac188ab7b25c1a4dd2c9
+#8 extracting sha256:136a888652a1277373c20061d1c0d79e332ba8eece5ba04c0c24fce61ce8940d 6.8s done
+#8 DONE 18.5s
+
+#8 [build 1/7] FROM docker.io/library/eclipse-temurin:21-jdk-alpine@sha256:bcc7ec7e8fef937ba9f01ee5f810361d722c6b5dbe19ac188ab7b25c1a4dd2c9
+#8 extracting sha256:5b440bedad35bcaf95f5c16474e5bcdc67677eca1377bc3b6bd9a64aa13552d0 0.0s done
+#8 extracting sha256:07c1bb0b54884876ce179c9ad3683a68d7689b97597df8b1b2dfeeaaf5e7b60e 0.0s done
+#8 DONE 18.6s
+
+#11 [build 2/7] WORKDIR /build
+#11 DONE 0.2s
+
+#12 [build 3/7] COPY .mvn/ .mvn/
+#12 DONE 0.1s
+
+#13 [build 4/7] COPY mvnw pom.xml ./
+#13 DONE 0.1s
+
+#14 [build 5/7] RUN chmod +x mvnw && ./mvnw dependency:go-offline -q
+#14 DONE 41.7s
+
+#15 [build 6/7] COPY src/ src/
+#15 DONE 0.3s
+
+#16 [build 7/7] RUN ./mvnw package -DskipTests -q
+#16 DONE 18.3s
+
+#17 [runtime 4/5] COPY --from=build /build/target/rent-tech-api-*.jar app.jar
+#17 DONE 0.3s
+
+#18 [runtime 5/5] RUN chown appuser:appgroup app.jar
+#18 DONE 0.6s
+
+#19 exporting to image
+#19 exporting layers
+#19 exporting layers 5.9s done
+#19 exporting manifest sha256:96538c5f40857e0b872917d96c63c45973e72edfabcd3f3dd5f11acd193e407a 0.0s done
+#19 exporting config sha256:c26b661b858e3ceda9b04ea9c54dcc02b299ff930ba06f83bda9033b69f0b802 0.0s done
+#19 exporting attestation manifest sha256:60638cca9e6bc23732cae479f9bcc316aade5a31c9a09bf87a118d437a303423 0.1s done
+#19 exporting manifest list sha256:65a2d54e1f89eacb7b3752ebe5df1712db004219380f4a121f68ac967c1d3c43
+#19 exporting manifest list sha256:65a2d54e1f89eacb7b3752ebe5df1712db004219380f4a121f68ac967c1d3c43 0.0s done
+#19 naming to docker.io/library/rent-tech-api:latest done
+#19 unpacking to docker.io/library/rent-tech-api:latest
+#19 unpacking to docker.io/library/rent-tech-api:latest 3.2s done
+#19 DONE 9.3s
+
+#20 resolving provenance for metadata file
+#20 DONE 0.0s
+ Image rent-tech-api:latest Built 
+ Network rent-tech_default Creating 
+ Network rent-tech_default Created 
+ Container rent-tech-api Creating 
+ Container rent-tech-api Created 
+ Container rent-tech-api Starting 
+ Container rent-tech-api Started 
+====================================
+Deployment finished at Thu Apr 23 04:47:48 AM +06 2026
+====================================
+====================================
+Deployment started at Tue Apr 28 03:48:43 AM +06 2026
+====================================
+Packaging source...
+Uploading to server...
+Building and deploying...
+ Container rent-tech-api Stopping 
+ Container rent-tech-api Stopped 
+ Container rent-tech-api Removing 
+ Container rent-tech-api Removed 
+ Network rent-tech_default Removing 
+ Network rent-tech_default Removed 
+ Image rent-tech-api:latest Building 
+#1 [internal] load local bake definitions
+#1 reading from stdin 481B done
+#1 DONE 0.0s
+
+#2 [internal] load build definition from Dockerfile
+#2 transferring dockerfile: 1.11kB 0.0s done
+#2 DONE 0.1s
+
+#3 [internal] load metadata for docker.io/library/eclipse-temurin:21-jre-alpine
+#3 ...
+
+#4 [internal] load metadata for docker.io/library/eclipse-temurin:21-jdk-alpine
+#4 DONE 1.7s
+
+#3 [internal] load metadata for docker.io/library/eclipse-temurin:21-jre-alpine
+#3 DONE 1.7s
+
+#5 [internal] load .dockerignore
+#5 transferring context: 119B 0.0s done
+#5 DONE 0.1s
+
+#6 [internal] load build context
+#6 DONE 0.0s
+
+#7 [runtime 1/5] FROM docker.io/library/eclipse-temurin:21-jre-alpine@sha256:ad0cdd9782db550ca7dde6939a16fd850d04e683d37d3cff79d84a5848ba6a5a
+#7 resolve docker.io/library/eclipse-temurin:21-jre-alpine@sha256:ad0cdd9782db550ca7dde6939a16fd850d04e683d37d3cff79d84a5848ba6a5a
+#7 resolve docker.io/library/eclipse-temurin:21-jre-alpine@sha256:ad0cdd9782db550ca7dde6939a16fd850d04e683d37d3cff79d84a5848ba6a5a 0.2s done
+#7 DONE 0.2s
+
+#8 [build 1/7] FROM docker.io/library/eclipse-temurin:21-jdk-alpine@sha256:bcc7ec7e8fef937ba9f01ee5f810361d722c6b5dbe19ac188ab7b25c1a4dd2c9
+#8 resolve docker.io/library/eclipse-temurin:21-jdk-alpine@sha256:bcc7ec7e8fef937ba9f01ee5f810361d722c6b5dbe19ac188ab7b25c1a4dd2c9 0.2s done
+#8 DONE 0.2s
+
+#6 [internal] load build context
+#6 transferring context: 41.30kB 0.2s done
+#6 DONE 0.2s
+
+#9 [build 2/7] WORKDIR /build
+#9 CACHED
+
+#10 [build 3/7] COPY .mvn/ .mvn/
+#10 CACHED
+
+#11 [build 4/7] COPY mvnw pom.xml ./
+#11 CACHED
+
+#12 [build 5/7] RUN chmod +x mvnw && ./mvnw dependency:go-offline -q
+#12 CACHED
+
+#13 [build 6/7] COPY src/ src/
+#13 DONE 0.4s
+
+#14 [build 7/7] RUN ./mvnw package -DskipTests -q
+#14 DONE 31.2s
+
+#15 [runtime 2/5] WORKDIR /app
+#15 CACHED
+
+#16 [runtime 3/5] RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+#16 CACHED
+
+#17 [runtime 4/5] COPY --from=build /build/target/rent-tech-api-*.jar app.jar
+#17 DONE 0.3s
+
+#18 [runtime 5/5] RUN chown appuser:appgroup app.jar
+#18 DONE 0.7s
+
+#19 exporting to image
+#19 exporting layers
+#19 exporting layers 6.1s done
+#19 exporting manifest sha256:bf4d3183cd706cb328593a1f00a17eb08a2b2d271c96e58b4086c79457582239 0.0s done
+#19 exporting config sha256:1e56caa028517aabce5a7def400a3041337cb47c93229707b5556c14d7e6727c 0.0s done
+#19 exporting attestation manifest sha256:8ad3ebb0cec57a4c4317e2f1ab9103222637d9b47bdeb7d19be3743878df2be4 0.0s done
+#19 exporting manifest list sha256:63bc31bd1b6521e3377b5eee77702fdc26b2dbc2bf6eba39d0cda7bc59be872a
+#19 exporting manifest list sha256:63bc31bd1b6521e3377b5eee77702fdc26b2dbc2bf6eba39d0cda7bc59be872a 0.0s done
+#19 naming to docker.io/library/rent-tech-api:latest done
+#19 unpacking to docker.io/library/rent-tech-api:latest
+#19 unpacking to docker.io/library/rent-tech-api:latest 3.8s done
+#19 DONE 10.2s
+
+#20 resolving provenance for metadata file
+#20 DONE 0.1s
+ Image rent-tech-api:latest Built 
+ Network rent-tech_default Creating 
+ Network rent-tech_default Created 
+ Container rent-tech-api Creating 
+ Container rent-tech-api Created 
+ Container rent-tech-api Starting 
+ Container rent-tech-api Started 
+====================================
+Deployment finished at Tue Apr 28 03:49:48 AM +06 2026
+====================================

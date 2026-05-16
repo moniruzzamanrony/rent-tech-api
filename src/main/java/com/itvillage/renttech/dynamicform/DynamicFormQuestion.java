@@ -4,12 +4,14 @@ import com.itvillage.renttech.base.model.MagicBaseModel;
 import com.itvillage.renttech.category.Category;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@SQLRestriction("is_deleted = false")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -52,12 +54,9 @@ public class DynamicFormQuestion extends MagicBaseModel implements Serializable 
     @OneToMany(
             mappedBy = "question",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true
+            cascade = CascadeType.ALL
     )
     private Set<QuestionOption> defaultOptions = new HashSet<>();
 
     private int position;
-
-    private boolean deleted = false;
 }

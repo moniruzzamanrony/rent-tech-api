@@ -6,7 +6,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import lombok.Data;
+import org.hibernate.annotations.SQLRestriction;
 
+@SQLRestriction("is_deleted = false")
 @Entity
 @Data
 @Table(name = "category",

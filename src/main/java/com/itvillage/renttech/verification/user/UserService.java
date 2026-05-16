@@ -6,7 +6,6 @@ import com.itvillage.renttech.base.expection.MagicException;
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
 import com.itvillage.renttech.base.utils.DateTimeUtils;
-import com.itvillage.renttech.base.utils.FileUtils;
 import com.itvillage.renttech.base.utils.TokenUtils;
 import com.itvillage.renttech.rentpackages.PackageType;
 import com.itvillage.renttech.rentpackages.RentPackage;
@@ -22,6 +21,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 @Slf4j
 @Service
@@ -75,10 +76,8 @@ public class UserService {
 
     private void deleteOldProfilePictureIfExists(User user) {
         String oldUrl = user.getProfilePicUrl();
-
         if (oldUrl != null && !oldUrl.isBlank()) {
-            String fileName = FileUtils.getFileNameFromUrl(oldUrl);
-            spaceService.deleteFile(fileName);
+            spaceService.deleteFile(oldUrl);
         }
     }
 
@@ -236,5 +235,31 @@ public class UserService {
     public APIResponseDto<Boolean> hasPurchasePackage() {
         boolean hasPurchasePackage = repository.existsByIdAndUserPackagesIsNotEmpty(TokenUtils.getCurrentUserId());
         return new APIResponseDto<>(HttpStatus.OK.value(), hasPurchasePackage);
+    }
+
+    public Page<UserAdminResponse> getAdminUsers(int page, int size, String sortBy, String sortDir, String mobileNo) {
+        Set<String> allowedSortFields = Set.of("createdDate");
+        String resolvedSort = allowedSortFields.contains(sortBy) ? sortBy : "createdDate";
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, JpaSort.unsafe(direction, resolvedSort));
+        return repository.findAdminUsers(mobileNo, pageable).map(this::toAdminResponse);
+    }
+
+    private UserAdminResponse toAdminResponse(UserAdminProjection p) {
+        UserAdminResponse r = new UserAdminResponse();
+        r.setId(p.getId());
+        r.setName(p.getName());
+        r.setMobileNo(p.getMobileNo());
+        r.setGender(Gender.fromCode(p.getGender()));
+        r.setNidNumber(p.getNidNumber());
+        r.setPresentAddress(p.getPresentAddress());
+        r.setCurrentCoins(p.getCurrentCoins());
+        r.setProfilePicUrl(p.getProfilePicUrl());
+        r.setProfession(Profession.fromCode(p.getProfession()));
+        r.setUniversityName(p.getUniversityName());
+        r.setCountTotalPurchaseSearchingPackages((int) p.getCountTotalPurchaseSearchingPackages());
+        r.setTotalSpeanAmount((int) p.getTotalSpendAmount());
+        r.setCountTotalPost((int) p.getCountTotalPost());
+        return r;
     }
 }

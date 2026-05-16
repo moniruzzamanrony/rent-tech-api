@@ -15,7 +15,7 @@ public interface DynamicFormQuestionRepository extends JpaRepository<DynamicForm
         SELECT DISTINCT q
         FROM DynamicFormQuestion q
         LEFT JOIN FETCH q.defaultOptions
-        WHERE q.category.id = :categoryId AND q.deleted = false
+        WHERE q.category.id = :categoryId
         ORDER BY q.position ASC
         """)
     List<DynamicFormQuestion> findAllByCategoryIdOrderByPositionAsc(@Param("categoryId") String categoryId);

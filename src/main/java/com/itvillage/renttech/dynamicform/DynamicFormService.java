@@ -139,7 +139,7 @@ public class DynamicFormService {
     public void deleteQuestion(String questionId) {
         DynamicFormQuestion dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Question not found"));
-        dynamicFormQuestion.setDeleted(true);
+        dynamicFormQuestion.setDelete(true);
         dynamicFormQuestionRepository.save(dynamicFormQuestion);
     }
 
@@ -152,16 +152,11 @@ public class DynamicFormService {
         if (hasAnyAnswer(questionId))
             throw new MagicException.NotPermittedException("Question has answers");
 
-        DynamicFormQuestion dynamicFormQuestion = dynamicFormQuestionRepository.findById(questionId)
-                .orElseThrow(() -> new MagicException.NotFoundException("Question not found"));
-
         QuestionOption questionOption = questionOptionRepository.findById(optionId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Option not found"));
 
-        dynamicFormQuestion.getDefaultOptions().remove(questionOption);
-
-        dynamicFormQuestionRepository.save(dynamicFormQuestion);
-        questionOptionRepository.delete(questionOption);
+        questionOption.setDelete(true);
+        questionOptionRepository.save(questionOption);
     }
 
     public List<DynamicFormQuestionResponse> getFormBycCategoryId(String categoryId) {

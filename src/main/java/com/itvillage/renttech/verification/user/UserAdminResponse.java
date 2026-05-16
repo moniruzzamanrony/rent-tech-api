@@ -2,11 +2,10 @@ package com.itvillage.renttech.verification.user;
 
 
 import com.itvillage.renttech.base.dto.BaseDto;
-import jakarta.persistence.Convert;
 import lombok.Data;
 
 @Data
-public class UserResponse extends BaseDto {
+public class UserAdminResponse extends BaseDto {
   private String name;
 
   private String mobileNo;
@@ -25,5 +24,9 @@ public class UserResponse extends BaseDto {
 
   private String universityName;
 
-  private UserPackageResponse activePackage;
+  private int countTotalPurchaseSearchingPackages;
+
+  private int totalSpeanAmount;
+
+  private int countTotalPost;
 }

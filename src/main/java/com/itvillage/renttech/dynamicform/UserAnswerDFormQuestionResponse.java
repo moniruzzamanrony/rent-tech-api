@@ -9,6 +9,6 @@ import java.util.List;
 public class UserAnswerDFormQuestionResponse extends BaseDto {
     private DynamicFormQuestionResponse question;
 
-    private List<String> answers;
+    private List<UserAnswerResponse> answers;
 
 }

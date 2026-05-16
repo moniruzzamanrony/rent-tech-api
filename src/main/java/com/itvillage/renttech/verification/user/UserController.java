@@ -59,4 +59,15 @@ public class UserController {
   public APIResponseDto<Boolean> hasPurchasePackage() {
     return userService.hasPurchasePackage();
   }
+
+  @GetMapping("/admin")
+  public APIResponseDto<Page<UserAdminResponse>> getAdminUsers(
+          @RequestParam(required = false) String mobileNo,
+          @RequestParam(defaultValue = "createdDate") String sortBy,
+          @RequestParam(defaultValue = "desc") String sortDir,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int size) {
+    return new APIResponseDto<>(HttpStatus.OK.value(),
+            userService.getAdminUsers(page, size, sortBy, sortDir, mobileNo));
+  }
 }

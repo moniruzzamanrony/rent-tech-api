@@ -45,4 +45,9 @@ public class CategoryController extends MagicController<CategoryService, Categor
         return new APIResponseDto<>(HttpStatus.OK.value(), categoryService.getAllActiveCat());
     }
 
+    @GetMapping("/all")
+    public List<CategoryResponse> getAllCat() {
+        return categoryService.getAllCat();
+    }
+
 }

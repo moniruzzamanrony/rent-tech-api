@@ -22,8 +22,8 @@ public class SpaceController {
             @RequestPart("file") MultipartFile file
     ) {
 
-        String url = spaceService.uploadFile(file);
-        return new APIResponseDto<>(HttpStatus.OK.value(), "Success", url);
+        String encoded = spaceService.uploadFile(file);
+        return new APIResponseDto<>(HttpStatus.OK.value(), "Success", UrlCreatorUtils.buildUrl(encoded));
 
     }
 

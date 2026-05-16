@@ -2,7 +2,6 @@ package com.itvillage.renttech.rentalpost;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -21,16 +20,12 @@ public interface RentalPostRepository extends JpaRepository<RentalPost, String> 
                 u.mobileNo as mobileNo,
                 c.name as categoryName,
                 c.iconUrl as categoryIconUrl,
-                ans.answer as title,
+                r.name as title,
                 SIZE(r.interestedPeople) as interestedPeopleCount
             FROM RentalPost r
             JOIN r.owner u
             JOIN r.category c
-            JOIN r.formQuestionsAnswer qa
-            JOIN qa.dynamicFormQuestion df
-            JOIN qa.answers ans
-            WHERE df.id LIKE 'SYS_TITLE%'
-            AND r.owner.id = :ownerId
+            WHERE  r.owner.id = :ownerId
             ORDER BY r.createdDate DESC
             """)
     Page<RentalPostListResponse> findRentalPostListByOwnerId(
@@ -38,25 +33,16 @@ public interface RentalPostRepository extends JpaRepository<RentalPost, String> 
             Pageable pageable
     );
 
-    @Query(value = """
-            SELECT
-                r.id,
-                r.latitude,
-                r.longitude,
-                r.valid,
-                JSON_OBJECTAGG(
-                    SUBSTRING_INDEX(q.dynamic_form_question_id, '_', 3),
-                    v.answer
-                ) AS answers
-            FROM rental_post r
-            JOIN user_answer_dynamic_form_question q
-              ON q.rental_post_id = r.id
-            JOIN user_answer_values v
-              ON v.user_answer_question_id = q.id
-            WHERE r.category_id = :categoryId
-              AND q.dynamic_form_question_id LIKE 'SYS_%'
-            GROUP BY r.id, r.latitude, r.longitude, r.valid""", nativeQuery = true)
-    List<RentalMapMarkerProjection> findAllByCategoryId(@Param("categoryId") String categoryId);
+    @Query("""
+            SELECT DISTINCT r FROM RentalPost r
+            JOIN FETCH r.formQuestionsAnswer fqa
+            JOIN FETCH fqa.dynamicFormQuestion dq
+            JOIN FETCH fqa.answers
+            WHERE r.category.id = :categoryId
+            AND r.valid = true
+            AND dq.purposeType = com.itvillage.renttech.dynamicform.PurposeType.SPECIFICATION
+            """)
+    List<RentalPost> findAllByCategoryIdForMap(@Param("categoryId") String categoryId);
 
     @Query("""
             SELECT DISTINCT
@@ -78,6 +64,20 @@ public interface RentalPostRepository extends JpaRepository<RentalPost, String> 
             """)
     Page<RentalPostListResponse> findAllByInterestedUserId(
             @Param("userId") String userId,
+            Pageable pageable
+    );
+
+    @Query("""
+            SELECT r
+            FROM RentalPost r
+            JOIN r.owner u
+            JOIN r.category c
+            WHERE (:categoryName IS NULL OR :categoryName = '' OR LOWER(c.name) LIKE LOWER(CONCAT('%', :categoryName, '%')))
+            AND (:ownerPhoneNo IS NULL OR :ownerPhoneNo = '' OR u.mobileNo LIKE CONCAT('%', :ownerPhoneNo, '%'))
+            """)
+    Page<RentalPost> findAdminRentalPosts(
+            @Param("categoryName") String categoryName,
+            @Param("ownerPhoneNo") String ownerPhoneNo,
             Pageable pageable
     );
 

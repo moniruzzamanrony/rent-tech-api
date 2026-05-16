@@ -3,6 +3,7 @@ package com.itvillage.renttech.base.service;
 
 
 import com.itvillage.renttech.base.expection.MagicException;
+import com.itvillage.renttech.base.model.MagicBaseModel;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -24,7 +25,9 @@ public class MagicService<T, ID > {
     }
 
     public void deleteById(String id) {
-         repository.deleteById((ID) id);
+        T entity = getById(id);
+        ((MagicBaseModel) entity).setDelete(true);
+        repository.save(entity);
     }
 
     public T save(T body) {

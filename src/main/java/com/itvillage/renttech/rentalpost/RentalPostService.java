@@ -1,6 +1,7 @@
 package com.itvillage.renttech.rentalpost;
 
 
+import com.itvillage.renttech.base.constants.ApiConstant;
 import com.itvillage.renttech.base.expection.MagicException;
 import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
@@ -21,8 +22,13 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.JpaSort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.ZonedDateTime;
@@ -41,114 +47,112 @@ public class RentalPostService {
     private final SpaceService spaceService;
     private final NotificationService notificationService;
     private final RentPackageRepository rentPackageRepository;
+    private final QuestionOptionRepository questionOptionRepository;
+    private final RentalPostAsyncService rentalPostAsyncService;
 
     @Transactional
     public RentalPostResponse createRentalPost(RentalPostRequest request) {
 
         long start = System.currentTimeMillis();
 
-        RentalPost rentalPost = new RentalPost();
+        // Validate package + options up-front so the client gets immediate feedback
+        RentPackage rentPackage = rentPackageRepository.findById(request.getRentPackageId())
+                .orElseThrow(() -> new MagicException.NotFoundException("Rent package not found"));
+        if (!rentPackage.getPackageType().equals(PackageType.POST_ADS_PACKAGE)) {
+            throw new MagicException.NotFoundException("Invalid Package not supported.");
+        }
+        if (request.getFormQuestionsAnswer() != null && !request.getFormQuestionsAnswer().isEmpty()) {
+            loadAndValidateOptionMap(request.getFormQuestionsAnswer());
+        }
 
-        // Copy basic properties
+        RentalPost rentalPost = new RentalPost();
         BeanUtils.copyProperties(request, rentalPost, "formQuestionsAnswer", "categoryId");
 
-        // Set category
         Category category = new Category();
         category.setId(request.getCategoryId());
         rentalPost.setCategory(category);
 
-        // Set owner
         User user = new User();
         user.setId(TokenUtils.getCurrentUserId());
         rentalPost.setOwner(user);
 
-        // =========================
-        // Handle Dynamic Form Answers
-        // =========================
-        if (request.getFormQuestionsAnswer() != null && !request.getFormQuestionsAnswer().isEmpty()) {
-
-            Set<String> questionIds = request.getFormQuestionsAnswer().stream()
-                    .map(UserAnswerDFormQuestionRequest::getDynamicFormQuestionId)
-                    .collect(Collectors.toSet());
-
-            Map<String, DynamicFormQuestion> questionMap =
-                    dynamicFormService.getByIds(questionIds).stream()
-                            .collect(Collectors.toMap(DynamicFormQuestion::getId, q -> q));
-
-            List<UserAnswerDFormQuestion> answers = new ArrayList<>();
-
-            for (UserAnswerDFormQuestionRequest q : request.getFormQuestionsAnswer()) {
-
-                String qId = q.getDynamicFormQuestionId();
-
-                DynamicFormQuestion question = questionMap.get(qId);
-                if (question == null) {
-                    throw new MagicException.NotFoundException("Dynamic question not found: " + qId);
-                }
-
-                // Create answer entity
-                UserAnswerDFormQuestion answerEntity = new UserAnswerDFormQuestion();
-                answerEntity.setDynamicFormQuestion(question);
-                answerEntity.setAnswersFromStrings(q.getAnswers());
-                answers.add(answerEntity);
-
-                // =========================
-                // 🔥 Handle SYS fields (single pass)
-                // =========================
-                if (q.getAnswers() != null && !q.getAnswers().isEmpty()) {
-
-                    String answer = q.getAnswers().getFirst();
-
-                    if (qId != null && qId.startsWith("SYS_LOCATION")) {
-                        String[] latLong = answer.split(",");
-                        if (latLong.length == 2) {
-                            try {
-                                rentalPost.setLatitude(Double.parseDouble(latLong[0].trim()));
-                                rentalPost.setLongitude(Double.parseDouble(latLong[1].trim()));
-                            } catch (Exception ignored) {}
-                        }
-                    }
-
-                    if (qId != null && qId.startsWith("SYS_TITLE")) {
-                        rentalPost.setName(answer);
-                    }
-                }
-            }
-
-            rentalPost.setFormQuestionsAnswer(new HashSet<>(answers));
-        }
-
-        // =========================
-        // Rent Package
-        // =========================
-        RentPackage rentPackage = rentPackageRepository.findById(request.getRentPackageId())
-                .orElseThrow(() -> new MagicException.NotFoundException("Rent package not found"));
-
-        if (!rentPackage.getPackageType().equals(PackageType.POST_ADS_PACKAGE)) {
-            throw new MagicException.NotFoundException("Invalid Package not supported.");
-        }
-
-        userService.deductCoins(rentPackage.getPriceInCoins());
+        // SYS fields drive NOT NULL columns (name) and the map view (lat/lng) — extract sync
+        applySysFields(rentalPost, request.getFormQuestionsAnswer());
 
         if (rentPackage.getValidityInDays() != null) {
             rentalPost.setExpiryDate(
                     DateTimeUtils.addDays(ZonedDateTime.now(), rentPackage.getValidityInDays())
             );
         }
-
         rentalPost.setValid(true);
+        rentalPost.setProcessingStatus(ProcessingStatus.PENDING);
 
-        // =========================
-        // Save
-        // =========================
+        userService.deductCoins(rentPackage.getPriceInCoins());
+
         rentalPost = rentalPostRepository.save(rentalPost);
 
-        log.info("createRentalPost took {} ms", System.currentTimeMillis() - start);
+        // Defer the async hand-off until the outer tx commits — otherwise the
+        // executor thread races the commit and findFullById misses the row.
+        final String savedId = rentalPost.getId();
+        final List<UserAnswerDFormQuestionRequest> savedAnswers = request.getFormQuestionsAnswer();
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                rentalPostAsyncService.finishProcessing(savedId, savedAnswers);
+            }
+        });
 
-        // =========================
-        // 🔥 Return LIGHTWEIGHT response (IMPORTANT)
-        // =========================
+        log.info("createRentalPost (skeleton) took {} ms", System.currentTimeMillis() - start);
+
         return ConverterUtils.convert(rentalPost, List.of());
+    }
+
+    private void applySysFields(RentalPost rentalPost, List<UserAnswerDFormQuestionRequest> formAnswers) {
+        if (formAnswers == null || formAnswers.isEmpty()) {
+            return;
+        }
+
+        // Look up labels for the SYS questions whose labels we denormalize onto the post.
+        Set<String> labelQuestionIds = formAnswers.stream()
+                .map(UserAnswerDFormQuestionRequest::getDynamicFormQuestionId)
+                .filter(id -> id != null
+                        && (id.startsWith(ApiConstant.SYS_PRICE_QS_)
+                            || id.startsWith(ApiConstant.SYS_AVAILABLE_FROM_QS_)))
+                .collect(Collectors.toSet());
+        Map<String, String> labelByQid = labelQuestionIds.isEmpty()
+                ? Map.of()
+                : dynamicFormService.getByIds(labelQuestionIds).stream()
+                        .collect(Collectors.toMap(DynamicFormQuestion::getId, DynamicFormQuestion::getLabel));
+
+        for (UserAnswerDFormQuestionRequest q : formAnswers) {
+            String qId = q.getDynamicFormQuestionId();
+            if (qId == null || q.getAnswers() == null || q.getAnswers().isEmpty()) {
+                continue;
+            }
+            String answer = q.getAnswers().getFirst().getValue();
+            if (answer == null) continue;
+
+            if (qId.startsWith(ApiConstant.SYS_LOCATION_QS_)) {
+                String[] latLong = answer.split(",");
+                if (latLong.length == 2) {
+                    try {
+                        rentalPost.setLatitude(Double.parseDouble(latLong[0].trim()));
+                        rentalPost.setLongitude(Double.parseDouble(latLong[1].trim()));
+                    } catch (Exception ignored) {}
+                }
+            }
+            if (qId.startsWith(ApiConstant.SYS_TITLE_QS_)) {
+                rentalPost.setName(answer);
+            }
+            if (qId.startsWith(ApiConstant.SYS_PRICE_QS_)) {
+                rentalPost.setPriceLabel(labelByQid.get(qId));
+                rentalPost.setPrice(answer);
+            }
+            if (qId.startsWith(ApiConstant.SYS_AVAILABLE_FROM_QS_)) {
+                rentalPost.setAvailableFromLabel(labelByQid.get(qId));
+                rentalPost.setAvailableFrom(answer);
+            }
+        }
     }
 
     public RentalPostResponse updateLocation(String rentalId, String latitude, String longitude) {
@@ -194,9 +198,10 @@ public class RentalPostService {
         // Delete file from S3
         spaceService.deleteFile(fileToDelete.getUrl());
 
-        // Remove file from the list and save the rental post
-        rentalPost.getRentalPostFiles().remove(fileToDelete);
-        rentalPost = rentalPostRepository.save(rentalPost);
+        // Soft delete: mark as deleted, cascade saves it, remove from in-memory set for clean response
+        fileToDelete.setDelete(true);
+        rentalPostRepository.save(rentalPost);
+        rentalPost.getRentalPostFiles().removeIf(f -> f.isDelete());
 
         return ConverterUtils.convert(rentalPost);
     }
@@ -248,9 +253,20 @@ public class RentalPostService {
         return ConverterUtils.convert(rentalPost,List.of("category","owner","formQuestionsAnswer","rentalPostFiles","interestedPeople"));
     }
 
-    public List<RentalMapMarkerProjection> getPostLocationByCategory(String categoryId) {
-        List<RentalMapMarkerProjection> rentalPosts = rentalPostRepository.findAllByCategoryId(categoryId);
-        return rentalPosts;
+    public List<RentalMapMarkerResponse> getPostLocationByCategory(String categoryId) {
+        return rentalPostRepository.findAllByCategoryIdForMap(categoryId).stream()
+                .map(post -> {
+                    RentalMapMarkerResponse response = new RentalMapMarkerResponse();
+                    BeanUtils.copyProperties(post, response, "formQuestionsAnswer", "interestedPeople", "rentalPostFiles", "category", "owner");
+                    List<UserAnswerDFormQuestionResponse> specAnswers = post.getFormQuestionsAnswer().stream()
+                            .sorted(Comparator.comparingInt((UserAnswerDFormQuestion a) -> a.getDynamicFormQuestion().getPosition()))
+                            .limit(3)
+                            .map(a -> ConverterUtils.convert(a))
+                            .toList();
+                    response.setFirst3Specifications(specAnswers);
+                    return response;
+                })
+                .toList();
     }
 
     public Page<RentalPostListResponse> getMyInterestedRentalPost(Pageable pageable) {
@@ -261,59 +277,91 @@ public class RentalPostService {
     }
 
     @Transactional
+    public Page<RentalPostAdminResponse> getAdminRentalPosts(
+            int page,
+            int size,
+            String sortDir,
+            String categoryName,
+            String ownerPhoneNo
+    ) {
+        Sort.Direction direction = "asc".equalsIgnoreCase(sortDir) ? Sort.Direction.ASC : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, JpaSort.unsafe(direction, "createdDate"));
+
+        return rentalPostRepository
+                .findAdminRentalPosts(categoryName, ownerPhoneNo, pageable)
+                .map(this::toAdminResponse);
+    }
+
+    private RentalPostAdminResponse toAdminResponse(RentalPost rentalPost) {
+        RentalPostAdminResponse response = new RentalPostAdminResponse();
+        BeanUtils.copyProperties(rentalPost, response, "owner", "category", "formQuestionsAnswer", "rentalPostFiles", "interestedPeople");
+        response.setOwnerName(rentalPost.getOwner().getName());
+        response.setOwnerPhoneNo(rentalPost.getOwner().getMobileNo());
+        response.setCategoryName(rentalPost.getCategory().getName());
+        response.setCountInterestedPeople(rentalPost.getInterestedPeople().size());
+        return response;
+    }
+
+    @Transactional
     public RentalPostResponse updateRentalPost(String rentalId, RentalPostRequest request) {
         RentalPost rentalPost = rentalPostRepository.findFullById(rentalId)
                 .orElseThrow(() -> new MagicException.NotFoundException("Rental post not found"));
 
+        List<UserAnswerDFormQuestionRequest> formAnswers = request.getFormQuestionsAnswer();
+        boolean hasFormAnswers = formAnswers != null && !formAnswers.isEmpty();
+
+        // Validate option ids up-front so the client gets immediate feedback
+        if (hasFormAnswers) {
+            loadAndValidateOptionMap(formAnswers);
+        }
+
         BeanUtils.copyProperties(request, rentalPost,
                 "formQuestionsAnswer", "categoryId", "interestedPeople", "rentalPostFiles");
 
-        List<UserAnswerDFormQuestionRequest> formAnswers = request.getFormQuestionsAnswer();
-        if (formAnswers != null && !formAnswers.isEmpty()) {
-
-            Set<String> questionIds = formAnswers.stream()
-                    .map(UserAnswerDFormQuestionRequest::getDynamicFormQuestionId)
-                    .collect(Collectors.toSet());
-
-            Map<String, DynamicFormQuestion> questionMap = dynamicFormService.getByIds(questionIds)
-                    .stream()
-                    .collect(Collectors.toMap(DynamicFormQuestion::getId, q -> q));
-
-            // Map existing answers by dynamicFormQuestionId
-            Map<String, UserAnswerDFormQuestion> existingAnswerMap = rentalPost.getFormQuestionsAnswer()
-                    .stream()
-                    .collect(Collectors.toMap(ans -> ans.getDynamicFormQuestion().getId(), ans -> ans));
-
-            List<UserAnswerDFormQuestion> updatedAnswers = new ArrayList<>();
-
-            for (UserAnswerDFormQuestionRequest req : formAnswers) {
-                DynamicFormQuestion question = questionMap.get(req.getDynamicFormQuestionId());
-                if (question == null) {
-                    throw new MagicException.NotFoundException(
-                            "Dynamic question not found: " + req.getDynamicFormQuestionId()
-                    );
-                }
-
-                UserAnswerDFormQuestion answer = existingAnswerMap.get(req.getDynamicFormQuestionId());
-                if (answer != null) {
-                    // Update existing answer
-                    answer.setAnswersFromStrings(req.getAnswers());
-                } else {
-                    // Create new answer if it doesn't exist
-                    answer = new UserAnswerDFormQuestion();
-                    answer.setDynamicFormQuestion(question);
-                    answer.setAnswersFromStrings(req.getAnswers());
-                }
-                updatedAnswers.add(answer);
-            }
-
-            // Replace the old list with updated list
-            rentalPost.getFormQuestionsAnswer().clear();
-            rentalPost.getFormQuestionsAnswer().addAll(updatedAnswers);
+        if (hasFormAnswers) {
+            rentalPost.setProcessingStatus(ProcessingStatus.PENDING);
         }
 
         RentalPost savedPost = rentalPostRepository.save(rentalPost);
+
+        if (hasFormAnswers) {
+            // Defer until commit — same race fix as create.
+            final String savedId = savedPost.getId();
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    rentalPostAsyncService.finishUpdateProcessing(savedId, formAnswers);
+                }
+            });
+            // Form answers will be reconciled async — skip relations to avoid
+            // returning the stale pre-update set.
+            return ConverterUtils.convert(savedPost, List.of());
+        }
+
         return ConverterUtils.convert(savedPost);
+    }
+
+    private Map<String, QuestionOption> loadAndValidateOptionMap(List<UserAnswerDFormQuestionRequest> formAnswers) {
+        Set<String> optionIds = formAnswers.stream()
+                .filter(q -> q.getAnswers() != null)
+                .flatMap(q -> q.getAnswers().stream())
+                .map(UserAnswerRequest::getOptionId)
+                .filter(id -> id != null && !id.isBlank())
+                .collect(Collectors.toSet());
+
+        if (optionIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+
+        Map<String, QuestionOption> optionMap = questionOptionRepository.findAllById(optionIds).stream()
+                .collect(Collectors.toMap(QuestionOption::getId, o -> o));
+
+        if (optionMap.size() != optionIds.size()) {
+            Set<String> missing = new HashSet<>(optionIds);
+            missing.removeAll(optionMap.keySet());
+            throw new MagicException.NotFoundException("Question option(s) not found: " + missing);
+        }
+        return optionMap;
     }
 
     public void deleteRentalPost(String rentalId) {
@@ -330,7 +378,8 @@ public class RentalPostService {
         notificationRequestDto.setReceiverIds(rentalPost.getInterestedPeople().stream().map(User::getId).toList());
         notificationService.save(notificationRequestDto);
 
-        rentalPostRepository.delete(rentalPost);
+        rentalPost.setDelete(true);
+        rentalPostRepository.save(rentalPost);
     }
 
     @Transactional

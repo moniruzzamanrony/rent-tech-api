@@ -6,6 +6,5 @@ public class ApiConstant {
   public static final String SYS_PRICE_QS_ = "SYS_PRICE_QS_";
   public static final String SYS_LOCATION_QS_ = "SYS_LOCATION_QS_";
   public static final String SYS_TITLE_QS_ = "SYS_TITLE_QS_";
-  public static final String SYS_ADDRESS_QS_ = "SYS_ADDRESS_QS_";
   public static final String SYS_AVAILABLE_FROM_QS_ = "SYS_AVAILABLE_FROM_QS_";
 }

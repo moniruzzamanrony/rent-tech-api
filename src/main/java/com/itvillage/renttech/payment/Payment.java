@@ -3,7 +3,9 @@ package com.itvillage.renttech.payment;
 import com.itvillage.renttech.base.model.MagicBaseModel;
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.SQLRestriction;
 
+@SQLRestriction("is_deleted = false")
 @Entity
 @Data
 @Table(name = "payment")

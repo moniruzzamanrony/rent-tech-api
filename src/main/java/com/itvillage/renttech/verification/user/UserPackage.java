@@ -4,10 +4,12 @@ import com.itvillage.renttech.base.model.MagicBaseModel;
 import com.itvillage.renttech.rentpackages.RentPackage;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
 
+@SQLRestriction("is_deleted = false")
 @Entity
 @Table(
         name = "user_package",

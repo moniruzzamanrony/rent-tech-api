@@ -16,6 +16,24 @@ public class RentalPostResponse extends BaseDto {
 
     private UserResponse owner;
 
+    private String name;
+
+    private String availableFromLabel;
+
+    private String availableFrom;
+
+    private String priceLabel;
+
+    private String price;
+
+    private String address;
+
+    private String division;
+
+    private String zilla;
+
+    private String thanaOrUpazila;
+
     private Category category;
 
     private double latitude;

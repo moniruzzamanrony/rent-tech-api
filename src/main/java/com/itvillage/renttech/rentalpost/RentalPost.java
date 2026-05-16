@@ -6,14 +6,15 @@ import com.itvillage.renttech.dynamicform.UserAnswerDFormQuestion;
 import com.itvillage.renttech.verification.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.io.Serializable;
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@SQLRestriction("is_deleted = false")
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,6 +30,25 @@ public class RentalPost extends MagicBaseModel implements Serializable {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    private String availableFromLabel;
+
+    private String availableFrom;
+
+    private String priceLabel;
+
+    private String price;
+
+    //id1,id2,id3
+    private String first3SpecificationsIds;
+
+    private String address;
+
+    private String division;
+
+    private String zilla;
+
+    private String thanaOrUpazila;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "user_id", nullable = false)
@@ -47,8 +67,7 @@ public class RentalPost extends MagicBaseModel implements Serializable {
     private double longitude;
 
     @OneToMany(fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL,
-            orphanRemoval = true)
+            cascade = CascadeType.ALL)
     @JoinColumn(name = "rental_post_id")
     private Set<RentalPostFile> rentalPostFiles = new HashSet<>();
 
@@ -75,4 +94,9 @@ public class RentalPost extends MagicBaseModel implements Serializable {
 
     @Column(name = "expiry_date")
     private ZonedDateTime expiryDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "processing_status", nullable = false,
+            columnDefinition = "VARCHAR(20) NOT NULL DEFAULT 'READY'")
+    private ProcessingStatus processingStatus = ProcessingStatus.PENDING;
 }

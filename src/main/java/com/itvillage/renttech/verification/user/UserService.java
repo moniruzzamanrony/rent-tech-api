@@ -152,8 +152,8 @@ public class UserService {
             throw e; // or return null, depending on your logic
         } catch (Exception e) {
             // Handle any other unexpected exceptions
-            System.err.println("Unexpected error while adding coins: " + e.getMessage());
-            throw new RuntimeException("Failed to add coins", e);
+            System.err.println("Unexpected error while adding credits: " + e.getMessage());
+            throw new RuntimeException("Failed to add credits", e);
         }
     }
 
@@ -178,7 +178,7 @@ public class UserService {
             throw new MagicException.BadRequestException("Package type not supported");
 
         if (user.getCurrentCoins() < rentPackage.getPriceInCoins()) {
-            throw new MagicException.BadRequestException("Insufficient coins");
+            throw new MagicException.BadRequestException("Insufficient credits");
         }
         user.setCurrentCoins(user.getCurrentCoins() - rentPackage.getPriceInCoins());
 
@@ -204,7 +204,7 @@ public class UserService {
                 .orElseThrow(() -> new MagicException.NotFoundException("User not found"));
 
         if (user.getCurrentCoins() < chargeCoins) {
-            throw new MagicException.BadRequestException("Insufficient coins");
+            throw new MagicException.BadRequestException("Insufficient credits");
         }
         user.setCurrentCoins(user.getCurrentCoins() - chargeCoins);
         repository.save(user);

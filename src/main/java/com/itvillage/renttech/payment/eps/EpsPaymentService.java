@@ -53,7 +53,7 @@ public class EpsPaymentService {
         epsCreatePaymentRequest.setCustomerPostcode(request.getBillingAddressDto().getCustomerPostcode());
         epsCreatePaymentRequest.setCustomerCountry(request.getBillingAddressDto().getCustomerCountry());
 
-        epsCreatePaymentRequest.setProductName(request.getCoinQty() + " coins");
+        epsCreatePaymentRequest.setProductName(request.getCoinQty() + " credits");
         epsCreatePaymentRequest.setCancelUrl(epsConfig.getMyHostUrl() + ApiConstant.PRIVATE_BASE_API+"/payments/cancel");
         epsCreatePaymentRequest.setFailUrl(epsConfig.getMyHostUrl() + ApiConstant.PRIVATE_BASE_API+"/payments/fail");
         epsCreatePaymentRequest.setSuccessUrl(epsConfig.getMyHostUrl() + ApiConstant.PRIVATE_BASE_API+"/payments/success");
@@ -176,11 +176,11 @@ public class EpsPaymentService {
                 try {
                     userService.addCoins(payment.getUserId(),payment.getCoinQty());
                     verificationDto.setSuccess(true);
-                    verificationDto.setMessage("Successfully added coins to user");
+                    verificationDto.setMessage("Successfully added credits to user");
                 } catch (Exception e) {
                     verificationDto.setSuccess(false);
-                    verificationDto.setMessage("Failed to add coins to user");
-                    System.err.println("Failed to add coins to user: " + e.getMessage());
+                    verificationDto.setMessage("Failed to add credits to user");
+                    System.err.println("Failed to add credits to user: " + e.getMessage());
                 }
             }
 

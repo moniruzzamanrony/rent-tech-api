@@ -81,27 +81,10 @@ public class AuthService {
       return new APIResponseDto<TokenResponse>(HttpStatus.FORBIDDEN.value(), "Invalid OTP", null);
   }
 
-  @Transactional
-  public APIResponseDto<TokenResponse> adminCreate(AdminAuthRequest request) {
-    User user;
-    var userOptional = userService.getUserByMobileNoNumber(request.getMobileNo());
-
-    if (userOptional.isPresent())
-      return new APIResponseDto<TokenResponse>(
-          HttpStatus.FORBIDDEN.value(), "User already exist.", null);
-    user = userService.createAdminUser(request.getMobileNo(), request.getPassword());
-
-    var jwtToken = jwtService.generateToken(user);
-    var refreshToken = jwtService.generateRefreshToken(user);
-    return new APIResponseDto<TokenResponse>(
-        HttpStatus.OK.value(),
-        TokenResponse.builder().accessToken(jwtToken).refreshToken(refreshToken).build());
-  }
-
   public boolean isValidOTP(String phoneNumber, String code) {
     Optional<OTP> optionalOTP =
         otpRepository.findByPhoneNoAndOtpCodeAndIsValid(phoneNumber, code, true);
-    if (optionalOTP.isPresent()) otpRepository.delete(optionalOTP.get());
+    if (optionalOTP.isPresent()) otpRepository.deleteById(optionalOTP.get().getId());
     else return false;
     return true;
   }

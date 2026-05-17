@@ -4,6 +4,7 @@ import com.itvillage.renttech.base.model.MagicBaseModel;
 import com.itvillage.renttech.category.Category;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
 import java.io.Serializable;
@@ -11,6 +12,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+@SQLDelete(sql = "UPDATE dynamic_form_question SET is_deleted = true WHERE id = ? AND version = ?")
 @SQLRestriction("is_deleted = false")
 @Getter
 @Setter

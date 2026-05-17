@@ -3,7 +3,11 @@ package com.itvillage.renttech.dynamicform;
 import com.itvillage.renttech.base.model.MagicBaseModel;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
+@SQLDelete(sql = "UPDATE user_answer_values SET is_deleted = true WHERE id = ? AND version = ?")
+@SQLRestriction("is_deleted = false")
 @Getter
 @Setter
 @NoArgsConstructor

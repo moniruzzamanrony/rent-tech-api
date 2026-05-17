@@ -37,11 +37,6 @@ public class AuthController {
     return authService.adminLogin(request);
   }
 
-  @PostMapping("/public/admin/users/create")
-  public APIResponseDto<TokenResponse> adminCreate(@RequestBody AdminAuthRequest request) {
-    return authService.adminCreate(request);
-  }
-
   @DeleteMapping("/public/otp/{phoneNo}")
   public void deleteExpiredOTP(@PathVariable String phoneNo) {
     authService.deleteExpiredOTP(phoneNo);

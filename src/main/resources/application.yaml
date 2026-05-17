@@ -50,6 +50,11 @@ application:
         expiration: 5184000000
     access:
       password: 418842
+  admins:
+    - mobile-no: 01988841891
+      password: 01988841891
+    - mobile-no: 01301042926
+      password: 01301042926
 
 sms:
   bdbulksms:

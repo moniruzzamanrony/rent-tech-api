@@ -4,8 +4,10 @@ import com.itvillage.renttech.base.model.MagicBaseModel;
 import com.itvillage.renttech.verification.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
 import org.hibernate.annotations.SQLRestriction;
 
+@SQLDelete(sql = "UPDATE notification SET is_deleted = true WHERE id = ? AND version = ?")
 @SQLRestriction("is_deleted = false")
 @Entity
 @Table(

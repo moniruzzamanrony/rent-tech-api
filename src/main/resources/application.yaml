@@ -4,7 +4,7 @@ spring:
 
   # Server DB
   datasource:
-    url: jdbc:mysql://79.143.188.39:3306/rent_tech_db?useSSL=true&requireSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true
+    url: jdbc:mysql://79.143.188.39:3306/rent_tech_db?useSSL=true&requireSSL=true&serverTimezone=UTC&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
     username: rent_tech_user
     password: Rent@SecureDB2026!
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -17,7 +17,7 @@ spring:
       max-lifetime: 1800000
   # Local DB
   #  datasource:
-  #    url: jdbc:mysql://localhost:3306/rent_tech_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+  #    url: jdbc:mysql://localhost:3306/rent_tech_db?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
   #    username: root
   #    password: password
   #    driver-class-name: com.mysql.cj.jdbc.Driver
@@ -29,6 +29,11 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.MySQLDialect
         show_sql: false
+        # JDBC batching — major speed-up for the seeder and bulk operations
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
   jackson:
     serialization:
       fail-on-empty-beans: false
@@ -55,6 +60,14 @@ application:
       password: 01988841891
     - mobile-no: 01301042926
       password: 01301042926
+  seed:
+    enabled: false        # flip to false after first run so we don't seed again
+    users-count: 100
+    categories-count: 50
+    posts-count: 500
+    interests-count: 200
+    batch-size: 100      # rows per transaction during bulk insert
+    default-password: password123
 
 sms:
   bdbulksms:

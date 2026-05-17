@@ -101,6 +101,20 @@
 			<artifactId>s3</artifactId>
 			<version>2.20.0</version>
 		</dependency>
+
+		<!-- JavaFaker for dummy data seeding -->
+		<dependency>
+			<groupId>com.github.javafaker</groupId>
+			<artifactId>javafaker</artifactId>
+			<version>1.0.2</version>
+			<exclusions>
+				<!-- javafaker pulls an old snakeyaml that clashes with Spring Boot's -->
+				<exclusion>
+					<groupId>org.yaml</groupId>
+					<artifactId>snakeyaml</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
 	</dependencies>
 
 	<build>

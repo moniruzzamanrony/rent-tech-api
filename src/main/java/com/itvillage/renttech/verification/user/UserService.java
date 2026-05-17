@@ -216,7 +216,7 @@ public class UserService {
                 .findAllByValidTrueAndExpiryDateBefore(ZonedDateTime.now());
 
         if (expiredPackages.isEmpty()) {
-            log.info("No expired user packages found to invalidate.");
+            log.debug("No expired user packages found to invalidate.");
             return;
         }
 

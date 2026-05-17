@@ -462,7 +462,7 @@ public class RentalPostService {
                 .findAllByValidTrueAndExpiryDateBefore(ZonedDateTime.now());
 
         if (rentalPosts.isEmpty()) {
-            log.info("No expired rental posts found to invalidate.");
+            log.debug("No expired rental posts found to invalidate.");
             return;
         }
 

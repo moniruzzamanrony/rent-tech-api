@@ -60,6 +60,10 @@ application:
       password: 01988841891
     - mobile-no: 01301042926
       password: 01301042926
+    - mobile-no: 01644950183
+      password: 01644950183
+    - mobile-no: 01726042345
+      password: 01726042345
   seed:
     enabled: false        # flip to false after first run so we don't seed again
     users-count: 100

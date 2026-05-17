@@ -5,16 +5,21 @@ import com.itvillage.renttech.base.modules.s3.SpaceService;
 import com.itvillage.renttech.base.utils.ConverterUtils;
 import com.itvillage.renttech.category.Category;
 import com.itvillage.renttech.category.CategoryRepository;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.Query;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,6 +33,9 @@ public class DynamicFormService {
     private final CategoryRepository categoryRepository;
 
     private final SpaceService spaceService;
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     public DynamicFormQuestionResponse createDynamicFormQuestion(
             DynamicFormQuestionRequest dynamicFormQuestionRequest,
@@ -174,38 +182,52 @@ public class DynamicFormService {
         return dynamicFormQuestionRepository.findAllByIdIn(questionIds);
     }
 
+    @Transactional
     public List<DynamicFormQuestionResponse> updatePositionOfDynamicQs(
             List<DynamicFormQuestionRequest> requests) {
-
-        // 1. Extract all IDs
-        List<String> ids = requests.stream()
-                .map(DynamicFormQuestionRequest::getId)
-                .toList();
-
-        // 2. Fetch all in ONE query
-        List<DynamicFormQuestion> questions = dynamicFormQuestionRepository.findAllById(ids);
-
-        // 3. Convert list → map for O(1) lookup
-        Map<String, DynamicFormQuestion> questionMap = questions.stream()
-                .collect(Collectors.toMap(DynamicFormQuestion::getId, Function.identity()));
-
-        // 4. Update positions
-        for (DynamicFormQuestionRequest request : requests) {
-            DynamicFormQuestion question = questionMap.get(request.getId());
-
-            if (question == null) {
-                throw new MagicException.NotFoundException("Question not found: " + request.getId());
-            }
-
-            question.setPosition(request.getPosition());
+        if (requests == null || requests.isEmpty()) {
+            return List.of();
         }
 
-        // 5. Save all (batch)
-        List<DynamicFormQuestion> updated = dynamicFormQuestionRepository.saveAll(questions);
+        // Single bulk UPDATE with CASE WHEN — one round-trip regardless of size.
+        // Avoids: per-row dirty checking, cascade through defaultOptions, and N+1
+        // lazy loads in the converter (which would re-fetch options/category).
+        StringBuilder sql = new StringBuilder("UPDATE dynamic_form_question SET position = CASE id");
+        Map<String, Object> params = new LinkedHashMap<>();
+        StringBuilder inClause = new StringBuilder();
+        int i = 0;
+        for (DynamicFormQuestionRequest r : requests) {
+            String idKey = "id" + i;
+            String posKey = "pos" + i;
+            sql.append(" WHEN :").append(idKey).append(" THEN :").append(posKey);
+            params.put(idKey, r.getId());
+            params.put(posKey, r.getPosition());
+            if (i > 0) inClause.append(',');
+            inClause.append(':').append(idKey);
+            i++;
+        }
+        sql.append(" END, modified_date = :now WHERE id IN (")
+                .append(inClause)
+                .append(") AND is_deleted = false");
 
-        // 6. Convert response
-        return updated.stream()
-                .map(ConverterUtils::convert)
+        Query query = entityManager.createNativeQuery(sql.toString());
+        query.setParameter("now", ZonedDateTime.now(ZoneId.of("UTC")));
+        params.forEach(query::setParameter);
+        int updated = query.executeUpdate();
+
+        if (updated != requests.size()) {
+            throw new MagicException.NotFoundException(
+                    "Question(s) not found. Updated " + updated + " of " + requests.size());
+        }
+
+        // Build response from inputs — no entity fetch, no lazy loads.
+        return requests.stream()
+                .map(r -> {
+                    DynamicFormQuestionResponse resp = new DynamicFormQuestionResponse();
+                    resp.setId(r.getId());
+                    resp.setPosition(r.getPosition());
+                    return resp;
+                })
                 .toList();
     }
 

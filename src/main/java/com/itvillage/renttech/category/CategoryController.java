@@ -34,6 +34,17 @@ public class CategoryController extends MagicController<CategoryService, Categor
         return new APIResponseDto<>(HttpStatus.OK.value(), categoryService.createCategory(request, file));
     }
 
+    @PutMapping(path = "/{catId}/update", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public APIResponseDto<CategoryResponse> updateCategory(
+            @PathVariable String catId,
+            @RequestPart("request") String requestString,
+            @RequestPart(value = "file", required = false) MultipartFile file) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
+        CategoryRequest request = mapper.readValue(requestString, CategoryRequest.class);
+
+        return new APIResponseDto<>(HttpStatus.OK.value(), categoryService.updateCategory(catId, request, file));
+    }
+
     @PostMapping("/{catId}/active-inactive")
     public APIResponseDto<CategoryResponse> categoryActiveInActive(@PathVariable String catId, @RequestParam boolean active) {
         return new APIResponseDto<>(HttpStatus.OK.value(), categoryService.categoryActiveInActive(catId, active));
